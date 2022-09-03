@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32811.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.Viewer", "Viewer\AKG.Viewer.csproj", "{CE065F4E-B11C-44C1-8FE4-06A8B20ED7A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.Rendering", "Rendering\AKG.Rendering.csproj", "{E9A08800-CF27-4B8F-91BF-7D328AACCD19}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader", "ObjReader\AKG.ObjReader.csproj", "{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader.Testing", "AKG.ObjReader.Testing\AKG.ObjReader.Testing.csproj", "{6E8FC726-3A86-4887-AB04-BA4B26B0776F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKG.Camera", "AKG.Camera\AKG.Camera.csproj", "{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{72CE7EE6-C74C-4A5E-AA7A-944E1F4DCFDA}"
+	ProjectSection(SolutionItems) = preProject
+		ObjFiles\humanoid_tri.obj = ObjFiles\humanoid_tri.obj
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE065F4E-B11C-44C1-8FE4-06A8B20ED7A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE065F4E-B11C-44C1-8FE4-06A8B20ED7A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE065F4E-B11C-44C1-8FE4-06A8B20ED7A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE065F4E-B11C-44C1-8FE4-06A8B20ED7A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9A08800-CF27-4B8F-91BF-7D328AACCD19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9A08800-CF27-4B8F-91BF-7D328AACCD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9A08800-CF27-4B8F-91BF-7D328AACCD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9A08800-CF27-4B8F-91BF-7D328AACCD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {093CC3F0-C1BF-4FA2-8010-B44B792167E1}
+	EndGlobalSection
+EndGlobal
