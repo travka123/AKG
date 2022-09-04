@@ -14,14 +14,14 @@ namespace AKG.Camera.Controls
         private float _moveSpeed = 0.01f;
         private float _rotationSpeed = 0.001f;
 
-        private Camera _camera;
+        private VCamera _camera;
 
         private float _yaw = -(float)Math.PI / 180 * 90;
         private float _pitch = 0;
 
         private Vector3 _position;
 
-        public FlyingCameraControls(Camera camera, Vector3 position)
+        public FlyingCameraControls(VCamera camera, Vector3 position)
         {
             _position = position;
             _camera = camera;

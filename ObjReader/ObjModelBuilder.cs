@@ -13,6 +13,7 @@ namespace Rendering
     public class ObjModelBuilder
     {
         private List<Vector4> _gVertices = new();
+        private List<Vector4> _nVertices = new();
 
         private struct Region
         {
@@ -33,6 +34,11 @@ namespace Rendering
         public void AddGeometricVertices(Vector4 vert)
         {
             _gVertices.Add(vert);
+        }
+
+        public void AddNormalVertices(Vector4 vector4)
+        {
+            _nVertices.Add(vector4);
         }
 
         public void AddFaces(List<(int, int, int)> faces)
@@ -68,7 +74,7 @@ namespace Rendering
 
             List<float> floats = new();
 
-            Action<(int v, int, int)> pipeline;
+            Action<(int v, int, int nv)> pipeline;
 
             pipeline = (face) =>
             {
@@ -78,6 +84,17 @@ namespace Rendering
                 floats.Add(gv.Z);
                 floats.Add(gv.W);
             };
+
+            if (_nVertices.Count > 0)
+            {
+                pipeline += (face) =>
+                {
+                    var nv = _nVertices[face.nv - 1];
+                    floats.Add(nv.X);
+                    floats.Add(nv.Y);
+                    floats.Add(nv.Z);
+                };
+            }
 
             foreach (var objFaces in regions)
             {

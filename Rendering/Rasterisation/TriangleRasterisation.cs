@@ -109,6 +109,10 @@ namespace AKG.Rendering.Rasterisation
                             {
                                 drawLine(list[i - 1].vo, list[i].vo, drawCallback);
                             }
+                            else if (list[i].x - list[i - 1].x == 1)
+                            {
+                                drawCallback(list[i - 1].x, pixelY, list[i - 1].vo.position, list[i - 1].vo.varying);
+                            }
                         }
                     }
                 }

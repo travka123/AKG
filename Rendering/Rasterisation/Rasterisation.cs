@@ -30,7 +30,8 @@ namespace AKG.Rendering.Rasterisation
         {
             lock (drawLocker)
             {
-                var rz = float.MaxValue - z;
+                //!!!
+                var rz = 100 - z;
                 if (zBuffer[y, x] < rz)
                 {
                     zBuffer[y, x] = rz;

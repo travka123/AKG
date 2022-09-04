@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace AKG.Camera
 {
-    public class Camera
+    public class VCamera
     {
         private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
 

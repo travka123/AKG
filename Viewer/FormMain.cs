@@ -2,6 +2,8 @@ using AKG.Camera;
 using AKG.Camera.Controls;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
+using AKG.Viewer;
+using AKG.Viewer.Meshes;
 using Microsoft.VisualBasic.Devices;
 using Rendering;
 using System.Collections;
@@ -13,69 +15,42 @@ using System.Windows.Forms;
 
 namespace Viewer
 {
-    struct Uniforms
-    {
-        public Camera camera;
-
-        public Uniforms(Camera camera)
-        {
-            this.camera = camera;
-        }
-    }
-
     public partial class FormMain : Form
     {
-        private Vector4[,] _canvas = null!;
-
-        private Vector4[] _vertices = null!;
-
-        private Renderer<Vector4, Uniforms> _renderer = null!;
-
-        private ShaderProgram<Vector4, Uniforms> _shader;
-
-        private Primitives _primitive = Primitives.TRIANGLE_LINES;
-
         private bool _stretch = false;
 
-        private Uniforms _uniforms = new(new());
+        private Vector4[,] _canvas;
 
-        private Input _input = new();
+        private Input _input;
+
+        private VCamera _camera;
 
         private CameraControl _cameraControl;
+
+        private Mesh _mesh;
 
         public FormMain()
         {
             InitializeComponent();
+
+            _canvas = new Vector4[this.Height, this.Width];
+
+            _input = new();
+
+            _camera = new VCamera();
+
+            _camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 100f));
+
+            _cameraControl = new FlyingCameraControls(_camera, new Vector3(5, 0, 30));
+
+            _mesh = new Teapot();
+
+            cbMeshes.DataSource = new List<string>() { "teapot", "ncube" };
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-
-            _vertices = ObjFileParser.Parse("../../../../ObjFiles/humanoid_tri.obj").BuildFlat<Vector4>();
-
-            _shader.vertexShader = (vi) =>
-            {
-                var position = Vector4.Transform(vi.attribute, vi.uniforms.camera.VP);
-                var t = Vector4.Transform(vi.attribute, vi.uniforms.camera.V);
-                return new(position, Array.Empty<float>());
-            };
-
-            _shader.fragmentShader = (fi) =>
-            {
-                return new(new Vector4(fi.screenPoint.Y /640, fi.screenPoint.Y / 640, fi.screenPoint.Y / 640, 1.0f));
-            };
-
-            _renderer = new Renderer<Vector4, Uniforms>(_shader);
-
-
-            _canvas = new Vector4[this.Height, this.Width];
-
-            _uniforms.camera.SetProjection(Camera.CreatePerspectiveFieldOfView((float)((Math.PI / 180) * 70), this.Width / this.Height));
-
-            
-
-            _cameraControl = new FlyingCameraControls(_uniforms.camera, new Vector3(5, 0, 30));
 
             var timer = new System.Windows.Forms.Timer();
 
@@ -96,11 +71,13 @@ namespace Viewer
                 _input.mouseOffset = Vector2.Zero;
             };
 
+            timer.Interval = 1;
+
             timer.Start();
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
-        {         
+        {
             _input.pressedKeys.Add(e.KeyValue);
         }
 
@@ -128,14 +105,14 @@ namespace Viewer
         protected override void OnMouseMove(MouseEventArgs e)
         {
             var location = new Vector2(e.X, e.Y);
-           
+
             _input.mouseOffset = location - _input.mousePosition;
             _input.mousePosition = location;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            
+
         }
 
         private SolidBrush _whiteBrush = new SolidBrush(Color.White);
@@ -146,9 +123,7 @@ namespace Viewer
             int canvasH = _canvas.GetLength(0);
             int canvasW = _canvas.GetLength(1);
 
-
-            _renderer.Draw(_canvas, _primitive, _vertices, _uniforms);
-
+            _mesh.Draw(_canvas, _camera);
 
             var colors = GetBMPColors(_canvas);
 
@@ -212,6 +187,16 @@ namespace Viewer
             }
 
             return bytes;
+        }
+
+        private void cbMeshes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _mesh = ((ComboBox)sender).SelectedItem switch {
+                "teapot" => new Teapot(),
+                "ncube" => new NCube(),
+            };
+
+            Invalidate();
         }
     }
 }
