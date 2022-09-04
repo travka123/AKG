@@ -7,19 +7,10 @@ namespace AKG.Camera
     {
         private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
 
-        private Matrix4x4 _view = Matrix4x4.Identity;
+        public Matrix4x4 V { get; set; } = Matrix4x4.Identity;
         private Matrix4x4 _projection = Matrix4x4.Identity;
 
-        private Vector3 _position = new Vector3(0.0f);
-        private Vector3 _target = new Vector3(0.0f);
-
         public Matrix4x4 VP { get; private set; } = Matrix4x4.Identity;
-
-        public void SetPosition(Vector3 position)
-        {
-            _position = position;
-            Update();
-        }
 
         public void SetProjection(Matrix4x4 projection)
         {
@@ -27,17 +18,15 @@ namespace AKG.Camera
             Update();
         }
 
-        public void SetTarget(Vector3 target)
+        public void SetView(Matrix4x4 view)
         {
-            _target = target;
+            V = view;
             Update();
         }
 
         private void Update()
         {
-            _view = Matrix4x4.CreateLookAt(_position, _target, _up);
-
-            VP = _view * _projection;
+            VP =  V * _projection;
         }
 
         public static Matrix4x4 CreatePerspectiveFieldOfView(float fovy, float aspect)

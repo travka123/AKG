@@ -155,7 +155,8 @@ namespace AKG.Rendering.Rasterisation
             {
                 return vec.X >= -1 && vec.X <= 1 &&
                        vec.Y >= -1 && vec.Y <= 1 &&
-                       vec.Z >= -1 && vec.Z <= 1;
+                       vec.Z >= -1 && vec.Z <= 1 &&
+                       vec.W >= -1 && vec.W <= 1;
             };
 
             return vo.Where((vo) => vo.All((vo) => checkVec(vo.position))).ToList();

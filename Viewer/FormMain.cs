@@ -1,4 +1,5 @@
 using AKG.Camera;
+using AKG.Camera.Controls;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
 using Microsoft.VisualBasic.Devices;
@@ -38,6 +39,10 @@ namespace Viewer
 
         private Uniforms _uniforms = new(new());
 
+        private Input _input = new();
+
+        private CameraControl _cameraControl;
+
         public FormMain()
         {
             InitializeComponent();
@@ -52,13 +57,13 @@ namespace Viewer
             _shader.vertexShader = (vi) =>
             {
                 var position = Vector4.Transform(vi.attribute, vi.uniforms.camera.VP);
-
+                var t = Vector4.Transform(vi.attribute, vi.uniforms.camera.V);
                 return new(position, Array.Empty<float>());
             };
 
             _shader.fragmentShader = (fi) =>
             {
-                return new(new Vector4(1.0f, 0.5f, 0.2f, 1.0f));
+                return new(new Vector4(fi.screenPoint.Y /640, fi.screenPoint.Y / 640, fi.screenPoint.Y / 640, 1.0f));
             };
 
             _renderer = new Renderer<Vector4, Uniforms>(_shader);
@@ -68,9 +73,64 @@ namespace Viewer
 
             _uniforms.camera.SetProjection(Camera.CreatePerspectiveFieldOfView((float)((Math.PI / 180) * 70), this.Width / this.Height));
 
-            _uniforms.camera.SetPosition(new Vector3(-20.0f, 0.0f, 30.0f));
+            
 
-            Invalidate();
+            _cameraControl = new FlyingCameraControls(_uniforms.camera, new Vector3(5, 0, 30));
+
+            var timer = new System.Windows.Forms.Timer();
+
+            timer.Tick += (obj, e) =>
+            {
+                var now = DateTime.Now;
+                _input.msDelta = (now - _input.time).Milliseconds;
+                _input.time = now;
+
+                if (_input.msDelta > 0)
+                {
+                    if (_cameraControl.Process(_input))
+                    {
+                        Invalidate();
+                    }
+                }
+
+                _input.mouseOffset = Vector2.Zero;
+            };
+
+            timer.Start();
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {         
+            _input.pressedKeys.Add(e.KeyValue);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            _input.pressedKeys.Remove(e.KeyValue);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _input.mouseBtn1Pressed = true;
+            }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _input.mouseBtn1Pressed = false;
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            var location = new Vector2(e.X, e.Y);
+           
+            _input.mouseOffset = location - _input.mousePosition;
+            _input.mousePosition = location;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -115,13 +175,14 @@ namespace Viewer
             }
 
             arr.Free();
-        }
 
-        protected override void OnKeyPress(KeyPressEventArgs e)
-        {
-            base.OnKeyPress(e);
-
-            Invalidate();
+            for (int i = 0; i < _canvas.GetLength(0); i++)
+            {
+                for (int j = 0; j < _canvas.GetLength(1); j++)
+                {
+                    _canvas[i, j] = Vector4.Zero;
+                }
+            }
         }
 
         private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
@@ -134,7 +195,8 @@ namespace Viewer
             byte[] bytes = new byte[colors.Length * 4];
 
             int offset = 0;
-            for (int y = height - 1; y >= 0; y--)
+
+            for (int y = 0; y < colors.GetLength(0); y++)
             {
                 for (int x = 0; x < colors.GetLength(1); x++)
                 {

@@ -8,6 +8,6 @@ namespace AKG.Camera.Controls
 {
     public abstract class CameraControl
     {
-        public abstract void Update();
+        public abstract bool Process(Input input);
     }
 }
