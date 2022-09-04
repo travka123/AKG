@@ -1,8 +1,10 @@
 using AKG.Camera;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
+using Microsoft.VisualBasic.Devices;
 using Rendering;
 using System.Collections;
+using System.Configuration;
 using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -56,7 +58,7 @@ namespace Viewer
 
             _shader.fragmentShader = (fi) =>
             {
-                return new(new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+                return new(new Vector4(1.0f, 0.5f, 0.2f, 1.0f));
             };
 
             _renderer = new Renderer<Vector4, Uniforms>(_shader);
@@ -71,14 +73,22 @@ namespace Viewer
             Invalidate();
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            
+        }
+
+        private SolidBrush _whiteBrush = new SolidBrush(Color.White);
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
 
             int canvasH = _canvas.GetLength(0);
             int canvasW = _canvas.GetLength(1);
 
+
             _renderer.Draw(_canvas, _primitive, _vertices, _uniforms);
+
 
             var colors = GetBMPColors(_canvas);
 
@@ -95,6 +105,7 @@ namespace Viewer
                 {
                     int fHeight = this.Height;
                     int fWidth = this.Width;
+                    e.Graphics.FillRectangle(_whiteBrush, 0, 0, Width, Height);
                     e.Graphics.DrawImage(bmp, 0, 0, fWidth, fHeight);
                 }
                 else
@@ -105,6 +116,15 @@ namespace Viewer
 
             arr.Free();
         }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            base.OnKeyPress(e);
+
+            Invalidate();
+        }
+
+        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
 
         private byte[] GetBMPColors(Vector4[,] colors)
         {
@@ -118,10 +138,12 @@ namespace Viewer
             {
                 for (int x = 0; x < colors.GetLength(1); x++)
                 {
-                    bytes[offset + 0] = (byte)(colors[y, x].Z * 255);
-                    bytes[offset + 1] = (byte)(colors[y, x].Y * 255);
-                    bytes[offset + 2] = (byte)(colors[y, x].X * 255);
-                    bytes[offset + 3] = (byte)(colors[y, x].W * 255);
+                    var color = Vector4.Add(Vector4.Multiply(colors[y, x], colors[y, x].W), Vector4.Multiply(_clearColor, 1 - colors[y, x].W));
+
+                    bytes[offset + 0] = (byte)(color.Z * 255);
+                    bytes[offset + 1] = (byte)(color.Y * 255);
+                    bytes[offset + 2] = (byte)(color.X * 255);
+                    bytes[offset + 3] = (byte)(color.W * 255);
 
                     offset += 4;
                 }

@@ -25,5 +25,18 @@ namespace AKG.Rendering.Rasterisation
                 }
             }
         }
+
+        protected void SetColor(Vector4[,] canvas, float[,] zBuffer, Vector4 color, int x, int y, float z, object drawLocker)
+        {
+            lock (drawLocker)
+            {
+                var rz = float.MaxValue - z;
+                if (zBuffer[y, x] < rz)
+                {
+                    zBuffer[y, x] = rz;
+                    canvas[y, x] = color;
+                }
+            }
+        }
     }
 }

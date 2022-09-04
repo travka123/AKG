@@ -11,7 +11,7 @@ namespace AKG.Rendering
         private static Dictionary<Primitives, Rasterisation<A, U>> rasterizations = new()
         {
              { Primitives.POINTS, new PointRasterisation<A, U>() },
-             { Primitives.TRIANGLE_LINES, new TriangleLineRasterisation<A, U>() },
+             { Primitives.TRIANGLE_LINES, new TriangleRasterisation<A, U>() },
         };
 
         public Renderer(ShaderProgram<A, U> shaderProgram)
