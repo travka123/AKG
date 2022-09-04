@@ -41,6 +41,10 @@
             this.cbMeshes.TabIndex = 0;
             this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
+            this.cbMeshes.Click += new System.EventHandler(this.cbMeshes_Click);
+            this.cbMeshes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbMeshes_KeyDown);
+            this.cbMeshes.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cbMeshes_KeyPress);
+            this.cbMeshes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.cbMeshes_KeyUp);
             // 
             // FormMain
             // 

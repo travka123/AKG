@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader", "ObjReader\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader.Testing", "AKG.ObjReader.Testing\AKG.ObjReader.Testing.csproj", "{6E8FC726-3A86-4887-AB04-BA4B26B0776F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKG.Camera", "AKG.Camera\AKG.Camera.csproj", "{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.Camera", "AKG.Camera\AKG.Camera.csproj", "{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{72CE7EE6-C74C-4A5E-AA7A-944E1F4DCFDA}"
 	ProjectSection(SolutionItems) = preProject
-		ObjFiles\humanoid_tri.obj = ObjFiles\humanoid_tri.obj
+		ObjFiles\Lowpoly_tree_sample.obj = ObjFiles\Lowpoly_tree_sample.obj
 	EndProjectSection
 EndProject
 Global

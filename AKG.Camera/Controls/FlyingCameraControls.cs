@@ -46,38 +46,31 @@ namespace AKG.Camera.Controls
 
                 var direction = CreateDirection();
 
-                float sYaw = (float)Math.Sin(_yaw);
-                float cYaw = (float)Math.Cos(_yaw);
-
                 if (input.pressedKeys.Contains(87))
                 {
                     move += direction;
-                    update = true;
                 }
 
                 if (input.pressedKeys.Contains(83))
                 {
                     move -= direction;
-                    update = true;
                 }
 
                 if (input.pressedKeys.Contains(65))
                 {
                     move -= Vector3.Cross(direction, _up);
-                    update = true;
                 }
 
                 if (input.pressedKeys.Contains(68))
                 {
                     move += Vector3.Cross(direction, _up);
-                    update = true;
                 }
 
-                update = true;
-
-                move += Vector3.Multiply(_moveSpeed * input.msDelta, Vector3.Normalize(move));
-
-                _position += move;
+                if (move.Length() > 0.1f)
+                {
+                    _position += Vector3.Multiply(_moveSpeed * input.msDelta, Vector3.Normalize(move));
+                    update = true;
+                }
             }
 
             if (update)

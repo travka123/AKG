@@ -29,6 +29,8 @@ namespace Viewer
 
         private Mesh _mesh;
 
+        private Dictionary<string, Func<Mesh>> _meshes;
+
         public FormMain()
         {
             InitializeComponent();
@@ -39,13 +41,21 @@ namespace Viewer
 
             _camera = new VCamera();
 
-            _camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 100f));
+            _camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 1000f));
 
             _cameraControl = new FlyingCameraControls(_camera, new Vector3(5, 0, 30));
 
             _mesh = new Teapot();
 
-            cbMeshes.DataSource = new List<string>() { "teapot", "ncube" };
+            _meshes = new Dictionary<string, Func<Mesh>>()
+            {
+                { "teapot", () => new Teapot() },
+                { "NCube", () => new NCube() },
+                { "shuttle", () => new PhongMeshWoN("../../../../ObjFiles/shuttle.obj", "../../../../ObjFiles/vp.mtl") },
+                { "tree", () => new PhongMeshWt("../../../../ObjFiles/Lowpoly_tree_sample.obj", "../../../../ObjFiles/Lowpoly_tree_sample.mtl") },
+            };
+
+            cbMeshes.DataSource = _meshes.Keys.ToList();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -74,6 +84,8 @@ namespace Viewer
             timer.Interval = 1;
 
             timer.Start();
+
+            Invalidate();
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -191,12 +203,32 @@ namespace Viewer
 
         private void cbMeshes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _mesh = ((ComboBox)sender).SelectedItem switch {
-                "teapot" => new Teapot(),
-                "ncube" => new NCube(),
-            };
+            _mesh = _meshes[(string)((ComboBox)sender).SelectedItem]();
 
             Invalidate();
+
+            ((ComboBox)sender).Enabled = false;
+            ((ComboBox)sender).Enabled = true;
+        }
+
+        private void cbMeshes_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void cbMeshes_KeyPress(object sender, KeyPressEventArgs e)
+        {
+
+        }
+
+        private void cbMeshes_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void cbMeshes_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 }
