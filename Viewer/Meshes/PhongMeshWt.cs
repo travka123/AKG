@@ -47,23 +47,41 @@ namespace AKG.Viewer.Meshes
 
             _vertices = builder.BuildFlat<Attributes>();
 
+            var light = new Vector3(15, 15, 0);
+            var lightColor = new Vector3(0.1f, 0.1f, 0.1f);
+
             var shader = new ShaderProgram<Attributes, Uniforms>();
 
             shader.vertexShader = (vi) =>
             {
                 var position = Vector4.Transform(vi.attribute.position, vi.uniforms.camera.VP);
 
-                var varying = new float[3];
-                varying[0] = vi.attribute.kd.X;
-                varying[1] = vi.attribute.kd.Y;
-                varying[2] = vi.attribute.kd.Z;
+                var varying = new float[9];
+
+                varying[0] = vi.attribute.position.X;
+                varying[1] = vi.attribute.position.Y;
+                varying[2] = vi.attribute.position.Z;
+
+                varying[3] = vi.attribute.normals.X;
+                varying[4] = vi.attribute.normals.Y;
+                varying[5] = vi.attribute.normals.Z;
+
+                varying[6] = vi.attribute.kd.X;
+                varying[7] = vi.attribute.kd.Y;
+                varying[8] = vi.attribute.kd.Z;
 
                 return new(position, varying);
             };
 
             shader.fragmentShader = (fi) =>
             {
-                return new(new Vector4(fi.varying[0], fi.varying[1], fi.varying[2], 1.0f));
+                var lightDir = Vector3.Normalize(light - new Vector3(fi.varying[0], fi.varying[1], fi.varying[2]));
+
+                var rl = Vector3.Dot(lightDir, new Vector3(fi.varying[3], fi.varying[4], fi.varying[5]));
+
+                rl = Math.Max(rl, 0);
+
+                return new(new Vector4(fi.varying[6] * rl, fi.varying[7] * rl, fi.varying[8] * rl, 1.0f));
             };
 
             _renderer = new Renderer<Attributes, Uniforms>(shader);

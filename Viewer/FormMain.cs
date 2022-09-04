@@ -56,6 +56,8 @@ namespace Viewer
             };
 
             cbMeshes.DataSource = _meshes.Keys.ToList();
+
+            Invalidate();
         }
 
         protected override void OnLoad(EventArgs e)
