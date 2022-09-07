@@ -10,7 +10,7 @@ namespace AKG.Rendering.Rasterisation
 {
     public abstract class Rasterisation<A, U>
     {
-        public abstract void Rasterize(Vector4[,] canvas, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms);
+        public abstract void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms);
 
         protected void SetColor(Vector4[,] canvas, float[,] zBuffer, Vector4 color, Vector2 pixel, float z, object drawLocker)
         {
@@ -28,16 +28,14 @@ namespace AKG.Rendering.Rasterisation
 
         protected void SetColor(Vector4[,] canvas, float[,] zBuffer, Vector4 color, int x, int y, float z, object drawLocker)
         {
-            lock (drawLocker)
-            {
-                //!!!
-                var rz = 100 - z;
-                if (zBuffer[y, x] < rz)
+            //lock (drawLocker)
+            //{
+                if (zBuffer[y, x] > z)
                 {
-                    zBuffer[y, x] = rz;
+                    zBuffer[y, x] = z;
                     canvas[y, x] = color;
                 }
-            }
+            //}
         }
     }
 }

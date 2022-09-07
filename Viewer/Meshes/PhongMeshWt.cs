@@ -87,11 +87,11 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public override void Draw(Vector4[,] colors, VCamera camera)
+        public override void Draw(Vector4[,] colors, float[,] zBuffer, VCamera camera)
         {
             _uniforms.camera = camera;
 
-            _renderer.Draw(colors, _primitive, _vertices, _uniforms);
+            _renderer.Draw(colors, zBuffer, _primitive, _vertices, _uniforms);
         }
     }
 }

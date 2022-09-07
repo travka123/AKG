@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.cbMeshes = new System.Windows.Forms.ComboBox();
+            this.btnShow = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cbMeshes
@@ -39,12 +40,17 @@
             this.cbMeshes.Name = "cbMeshes";
             this.cbMeshes.Size = new System.Drawing.Size(121, 23);
             this.cbMeshes.TabIndex = 0;
-            this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
-            this.cbMeshes.Click += new System.EventHandler(this.cbMeshes_Click);
-            this.cbMeshes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbMeshes_KeyDown);
-            this.cbMeshes.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cbMeshes_KeyPress);
-            this.cbMeshes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.cbMeshes_KeyUp);
+            // 
+            // btnShow
+            // 
+            this.btnShow.Location = new System.Drawing.Point(560, 12);
+            this.btnShow.Name = "btnShow";
+            this.btnShow.Size = new System.Drawing.Size(52, 23);
+            this.btnShow.TabIndex = 1;
+            this.btnShow.Text = "SHOW";
+            this.btnShow.UseVisualStyleBackColor = true;
+            this.btnShow.Click += new System.EventHandler(this.button1_Click);
             // 
             // FormMain
             // 
@@ -52,6 +58,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(624, 601);
             this.Controls.Add(this.cbMeshes);
+            this.Controls.Add(this.btnShow);
             this.KeyPreview = true;
             this.Name = "FormMain";
             this.Text = "Hello world";
@@ -60,7 +67,7 @@
         }
 
         #endregion
-
         private ComboBox cbMeshes;
+        private Button btnShow;
     }
 }

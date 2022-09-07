@@ -12,7 +12,7 @@ namespace AKG.Camera.Controls
         private static readonly Vector3 _up = new Vector3(0, 1, 0);
 
         private float _moveSpeed = 0.01f;
-        private float _rotationSpeed = 0.001f;
+        private float _rotationSpeed = 0.0018f;
 
         private VCamera _camera;
 
@@ -34,8 +34,19 @@ namespace AKG.Camera.Controls
 
             if (input.mouseBtn1Pressed && (input.mouseOffset != Vector2.Zero))
             {
-                _yaw += _rotationSpeed * input.mouseOffset.X * input.msDelta;
-                _pitch -= _rotationSpeed * input.mouseOffset.Y * input.msDelta;
+                var nOffset = Vector2.Normalize(input.mouseOffset) * input.mouseOffset.Length();
+
+                _yaw += _rotationSpeed * nOffset.X * input.msDelta;
+                _pitch -= _rotationSpeed * nOffset.Y * input.msDelta;
+
+                if (_pitch > (float)Math.PI /180 * 89)
+                {
+                    _pitch = (float)Math.PI / 180 * 89;
+                }
+                else if (_pitch < -(float)Math.PI / 180 * 89)
+                {
+                    _pitch = -(float)Math.PI / 180 * 89;
+                }
 
                 update = true;
             }
@@ -64,6 +75,22 @@ namespace AKG.Camera.Controls
                 if (input.pressedKeys.Contains(68))
                 {
                     move += Vector3.Cross(direction, _up);
+                }
+
+                if (move.Length() > 0.1f)
+                {
+                    _position += Vector3.Multiply(_moveSpeed * input.msDelta, Vector3.Normalize(move));
+                    update = true;
+                }
+
+                if (input.pressedKeys.Contains(32))
+                {
+                    move += _up;
+                }
+
+                if (input.pressedKeys.Contains(16))
+                {
+                    move -= _up;
                 }
 
                 if (move.Length() > 0.1f)

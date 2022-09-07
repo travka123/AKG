@@ -10,12 +10,10 @@ namespace AKG.Rendering.Rasterisation
 {
     public class TriangleRasterisation<A, U> : Rasterisation<A, U>
     {
-        public override void Rasterize(Vector4[,] canvas, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms)
+        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms)
         {
             int canvasH = canvas.GetLength(0);
             int canvasW = canvas.GetLength(1);
-
-            var zBuffer = new float[canvasH, canvasW];
 
             List<VertexShaderOutput[]> voTriangles = new();
 
@@ -82,36 +80,36 @@ namespace AKG.Rendering.Rasterisation
 
                 if (true)
                 {
-                    var boarders = new SortedDictionary<int, List<(int x, VertexShaderOutput vo)>>();
+                    var boarders = new SortedDictionary<int, SortedDictionary<int, VertexShaderOutput>>();
 
                     var collectCallback = (int pixelX, int pixelY, Vector4 ndc, float[] varying) =>
                     {
-                        var list = boarders.GetValueOrDefault(pixelY);
-                        if (list is null)
+                        var xDict = boarders.GetValueOrDefault(pixelY);
+                        if (xDict is null)
                         {
-                            list = new();
-                            boarders[pixelY] = list;
+                            xDict = new();
+                            boarders[pixelY] = xDict;
                         }
-                        list.Add((pixelX, new(ndc, varying)));
+                        xDict[pixelX] = new(ndc, varying);
                     };
 
                     drawLine(t[0], t[1], collectCallback);
                     drawLine(t[1], t[2], collectCallback);
                     drawLine(t[2], t[0], collectCallback);
 
-                    foreach ((int pixelY, var list) in boarders)
+                    foreach ((int pixelY, var xDict) in boarders)
                     {
-                        list.Sort((a, b) => a.x - b.x);
+                        var list = xDict.ToList();
 
                         for (int i = 1; i < list.Count; i++)
                         {
-                            if (list[i].x - list[i - 1].x > 1)
+                            if (list[i].Key - list[i - 1].Key > 1)
                             {
-                                drawLine(list[i - 1].vo, list[i].vo, drawCallback);
+                                drawLine(list[i - 1].Value, list[i].Value, drawCallback);
                             }
-                            else if (list[i].x - list[i - 1].x == 1)
+                            else if (list[i].Key - list[i - 1].Key == 1)
                             {
-                                drawCallback(list[i - 1].x, pixelY, list[i - 1].vo.position, list[i - 1].vo.varying);
+                                drawCallback(list[i - 1].Key, pixelY, list[i - 1].Value.position, list[i - 1].Value.varying);
                             }
                         }
                     }

@@ -19,7 +19,7 @@ namespace Viewer
     {
         private bool _stretch = false;
 
-        private Vector4[,] _canvas;
+        Bitmap _bmp;
 
         private Input _input;
 
@@ -35,7 +35,7 @@ namespace Viewer
         {
             InitializeComponent();
 
-            _canvas = new Vector4[this.Height, this.Width];
+            _bmp = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppPArgb);
 
             _input = new();
 
@@ -60,51 +60,83 @@ namespace Viewer
             Invalidate();
         }
 
+        private volatile bool _bmpOutdated = true;
+
+        private readonly object _inputLock = new object();
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            var timer = new System.Windows.Forms.Timer();
-
-            timer.Tick += (obj, e) =>
+            Task.Run(() =>
             {
-                var now = DateTime.Now;
-                _input.msDelta = (now - _input.time).Milliseconds;
-                _input.time = now;
+                Vector4[,] v4Colors = new Vector4[Height, Width];
+                float[,] zBuffer = new float[Height, Width];
 
-                if (_input.msDelta > 0)
+                while (true)
                 {
-                    if (_cameraControl.Process(_input))
+                    if (_bmpOutdated)
                     {
+                        _bmpOutdated = false;
+
+                        Clear(v4Colors);
+                        ClearZ(zBuffer);
+
+                        _mesh.Draw(v4Colors, zBuffer, _camera);
+
+                        var colors = GetBMPColors(v4Colors);
+
+                        lock (_bmp)
+                        {
+                            var bitmapInfo = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, _bmp.PixelFormat);
+
+                            Marshal.Copy(colors, 0, bitmapInfo.Scan0, colors.Length);
+
+                            _bmp.UnlockBits(bitmapInfo);
+                        }
+
                         Invalidate();
                     }
+
+                    lock (_inputLock)
+                    {
+                        var now = DateTime.Now;
+                        _input.msDelta = (now - _input.time).Milliseconds;
+                        _input.time = now;
+
+                        _bmpOutdated |= _cameraControl.Process(_input);
+
+                        _input.mouseOffset = Vector2.Zero;
+                    }
                 }
-
-                _input.mouseOffset = Vector2.Zero;
-            };
-
-            timer.Interval = 1;
-
-            timer.Start();
-
-            Invalidate();
+            });
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            _input.pressedKeys.Add(e.KeyValue);
+            lock (_inputLock)
+            {
+                _input.pressedKeys.Add(e.KeyValue);
+            }
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            _input.pressedKeys.Remove(e.KeyValue);
+            lock (_inputLock)
+            {
+                _input.pressedKeys.Remove(e.KeyValue);
+            }
+
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                _input.mouseBtn1Pressed = true;
+                lock (_inputLock)
+                {
+                    _input.mouseBtn1Pressed = true;
+                }
             }
         }
 
@@ -112,7 +144,10 @@ namespace Viewer
         {
             if (e.Button == MouseButtons.Left)
             {
-                _input.mouseBtn1Pressed = false;
+                lock (_inputLock)
+                {
+                    _input.mouseBtn1Pressed = false;
+                }
             }
         }
 
@@ -120,61 +155,31 @@ namespace Viewer
         {
             var location = new Vector2(e.X, e.Y);
 
-            _input.mouseOffset = location - _input.mousePosition;
-            _input.mousePosition = location;
+            lock (_inputLock)
+            {
+                _input.mouseOffset = location - _input.mousePosition;
+                _input.mousePosition = location;
+            }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-
-        }
-
-        private SolidBrush _whiteBrush = new SolidBrush(Color.White);
+        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-
-            int canvasH = _canvas.GetLength(0);
-            int canvasW = _canvas.GetLength(1);
-
-            _mesh.Draw(_canvas, _camera);
-
-            var colors = GetBMPColors(_canvas);
-
-            GCHandle arr = GCHandle.Alloc(colors, GCHandleType.Pinned);
-
-            int stride = colors.Length / canvasH;
-            PixelFormat format = PixelFormat.Format32bppPArgb;
-
-            IntPtr scan0 = arr.AddrOfPinnedObject();
-
-            using (var bmp = new Bitmap(canvasW, canvasH, stride, format, scan0))
+            lock (_bmp)
             {
                 if (_stretch)
                 {
                     int fHeight = this.Height;
                     int fWidth = this.Width;
-                    e.Graphics.FillRectangle(_whiteBrush, 0, 0, Width, Height);
-                    e.Graphics.DrawImage(bmp, 0, 0, fWidth, fHeight);
+                    e.Graphics.DrawImage(_bmp, 0, 0, fWidth, fHeight);
                 }
                 else
                 {
-                    e.Graphics.DrawImage(bmp, 0, 0);
-                }
-            }
-
-            arr.Free();
-
-            for (int i = 0; i < _canvas.GetLength(0); i++)
-            {
-                for (int j = 0; j < _canvas.GetLength(1); j++)
-                {
-                    _canvas[i, j] = Vector4.Zero;
+                    e.Graphics.DrawImage(_bmp, 0, 0);
                 }
             }
         }
-
-        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
 
         private byte[] GetBMPColors(Vector4[,] colors)
         {
@@ -185,16 +190,16 @@ namespace Viewer
 
             int offset = 0;
 
-            for (int y = 0; y < colors.GetLength(0); y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < colors.GetLength(1); x++)
+                for (int x = 0; x < width; x++)
                 {
-                    var color = Vector4.Add(Vector4.Multiply(colors[y, x], colors[y, x].W), Vector4.Multiply(_clearColor, 1 - colors[y, x].W));
+                    var byteColor = Vector4.Multiply(colors[y, x], 255);
 
-                    bytes[offset + 0] = (byte)(color.Z * 255);
-                    bytes[offset + 1] = (byte)(color.Y * 255);
-                    bytes[offset + 2] = (byte)(color.X * 255);
-                    bytes[offset + 3] = (byte)(color.W * 255);
+                    bytes[offset + 0] = (byte)byteColor.Z;
+                    bytes[offset + 1] = (byte)byteColor.Y;
+                    bytes[offset + 2] = (byte)byteColor.X;
+                    bytes[offset + 3] = (byte)byteColor.W;
 
                     offset += 4;
                 }
@@ -203,34 +208,64 @@ namespace Viewer
             return bytes;
         }
 
+        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
+
+        private void Clear(Vector4[,] colors)
+        {
+            int height = colors.GetLength(0);
+            int width = colors.GetLength(1);
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    colors[i, j] = _clearColor;
+                }
+            }
+        }
+
+        private void ClearZ(float[,] colors)
+        {
+            int height = colors.GetLength(0);
+            int width = colors.GetLength(1);
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    colors[i, j] = float.MaxValue;
+                }
+            }
+        }
+
         private void cbMeshes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _mesh = _meshes[(string)((ComboBox)sender).SelectedItem]();
+            var cb = (ComboBox)sender;
 
-            Invalidate();
+            _mesh = _meshes[(string)cb.SelectedItem]();
 
-            ((ComboBox)sender).Enabled = false;
-            ((ComboBox)sender).Enabled = true;
+            _bmpOutdated = true;
+
+            HideButtons();
         }
 
-        private void cbMeshes_KeyDown(object sender, KeyEventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-
+            ShowButtons();
         }
 
-        private void cbMeshes_KeyPress(object sender, KeyPressEventArgs e)
+        private void HideButtons()
         {
+            btnShow.Show();
 
+            cbMeshes.Hide();
         }
 
-        private void cbMeshes_KeyUp(object sender, KeyEventArgs e)
+        private void ShowButtons()
         {
+            btnShow.Hide();
 
-        }
-
-        private void cbMeshes_Click(object sender, EventArgs e)
-        {
-            
+            cbMeshes.Show();
         }
     }
 }
