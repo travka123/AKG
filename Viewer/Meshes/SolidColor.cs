@@ -9,27 +9,27 @@ using System.Threading.Tasks;
 using Viewer;
 using AKG.Camera;
 using Rendering;
+using AKG.ObjReader;
 
 namespace AKG.Viewer.Meshes
 {
-    public class Teapot : Mesh
+    public class SolidColor : Mesh
     {
+        public static readonly List<ObjModelAttr> Layout = new() {
+            ObjModelAttr.Position,
+        };
+
+        public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout);
+
+        public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
+
         private Vector4[] _vertices = null!;
 
         private Renderer<Vector4, Uniforms> _renderer;
 
-        private Primitives _primitive = Primitives.TRIANGLE_LINES;
-
-        struct Uniforms
+        public SolidColor(ObjModelBuilder builder)
         {
-            public VCamera camera;
-        }
-
-        private Uniforms _uniforms;
-
-        public Teapot()
-        {
-            _vertices = ObjFileParser.Parse("../../../../ObjFiles/teapot.obj").BuildFlat<Vector4>();
+            _vertices = builder.BuildFlatByConfig<Vector4>(ModelBuildConfig);
 
             var shader = new ShaderProgram<Vector4, Uniforms>();
 
@@ -47,11 +47,9 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Vector4, Uniforms>(shader);
         }
 
-        public override void Draw(Vector4[,] colors, float[,] zBuffer, VCamera camera)
+        public override void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
         {
-            _uniforms.camera = camera;
-
-            _renderer.Draw(colors, zBuffer, _primitive, _vertices, _uniforms);
+            _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms);
         }
     }
 }

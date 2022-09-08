@@ -21,7 +21,7 @@ namespace Rendering
                 { "usemtl", (s) => builder.SetMtl(s) },
                 { "s", (s) => { } },
                 { "o", (s) => { } },
-                { "mtllib", (s) => { } },
+                { "mtllib", (s) => Parse(builder.Path + "\\" + s, builder) },
 
                 { "newmtl", (s) => builder.NewMaterial(s) },
                 { "Ka", (s) => builder.SetKa(ParseVector3(s)) },
@@ -30,6 +30,8 @@ namespace Rendering
                 { "illum", (s) => builder.SetIllum(int.Parse(s)) },
                 { "Ns", (s) => builder.SetNs(float.Parse(s.Replace('.', ','))) },
                 { "d", (s) => { } },
+                { "Ke", (s) => { } },
+                { "Ni", (s) => { } },
             };
 
             var reader = new StreamReader(ms);
@@ -75,6 +77,12 @@ namespace Rendering
 
         public static ObjModelBuilder Parse(string path, ObjModelBuilder? builder = null)
         {
+            if (builder is null)
+            {
+                builder = new ObjModelBuilder();
+                builder.Path = Path.GetDirectoryName(path)!;
+            }
+
             using (var file = File.OpenRead(path))
             {
                 return Parse(file, builder);

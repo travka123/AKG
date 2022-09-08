@@ -1,5 +1,6 @@
 using AKG.Camera;
 using AKG.Camera.Controls;
+using AKG.ObjReader;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
 using AKG.Viewer;
@@ -17,19 +18,23 @@ namespace Viewer
 {
     public partial class FormMain : Form
     {
+        private const string PATH = "..\\..\\..\\..\\ObjFiles\\";
+
         private bool _stretch = false;
 
         Bitmap _bmp;
 
         private Input _input;
 
-        private VCamera _camera;
+        private Uniforms _uniforms;
 
         private CameraControl _cameraControl;
 
         private Mesh _mesh;
 
-        private Dictionary<string, Func<Mesh>> _meshes;
+        private Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)> _meshes;
+
+        private ObjModelBuilder _builder;
 
         public FormMain()
         {
@@ -39,25 +44,26 @@ namespace Viewer
 
             _input = new();
 
-            _camera = new VCamera();
+            var camera = new VCamera();
 
-            _camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 1000f));
+            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 1000f));
 
-            _cameraControl = new FlyingCameraControls(_camera, new Vector3(5, 0, 30));
+            _cameraControl = new FlyingCameraControls(camera, new Vector3(5, 0, 30));
 
-            _mesh = new Teapot();
+            var lights = new List<Light>() { new Light(new(10, 10, 10), new Vector3(1, 1, 1)) };
 
-            _meshes = new Dictionary<string, Func<Mesh>>()
+            _uniforms = new Uniforms(camera, lights);
+
+            var files = Directory.EnumerateFiles(PATH, "*.obj"); 
+
+            _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
-                { "teapot", () => new Teapot() },
-                { "NCube", () => new NCube() },
-                { "shuttle", () => new PhongMeshWoN("../../../../ObjFiles/shuttle.obj", "../../../../ObjFiles/vp.mtl") },
-                { "tree", () => new PhongMeshWt("../../../../ObjFiles/Lowpoly_tree_sample.obj", "../../../../ObjFiles/Lowpoly_tree_sample.mtl") },
+                { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder!)) },
+                { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder!)) },
+                { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
             };
 
-            cbMeshes.DataSource = _meshes.Keys.ToList();
-
-            Invalidate();
+            cbModels.DataSource = files.Select(f => f.Substring(PATH.Length)).ToList();
         }
 
         private volatile bool _bmpOutdated = true;
@@ -73,6 +79,8 @@ namespace Viewer
                 Vector4[,] v4Colors = new Vector4[Height, Width];
                 float[,] zBuffer = new float[Height, Width];
 
+                while (_mesh is null) { Thread.Sleep(0); }
+
                 while (true)
                 {
                     if (_bmpOutdated)
@@ -82,7 +90,7 @@ namespace Viewer
                         Clear(v4Colors);
                         ClearZ(zBuffer);
 
-                        _mesh.Draw(v4Colors, zBuffer, _camera);
+                        _mesh.Draw(v4Colors, zBuffer, _uniforms);
 
                         var colors = GetBMPColors(v4Colors);
 
@@ -240,12 +248,15 @@ namespace Viewer
 
         private void cbMeshes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var cb = (ComboBox)sender;
+            var meshStr = (string)((ComboBox)sender).SelectedItem;
 
-            _mesh = _meshes[(string)cb.SelectedItem]();
+            _mesh = _meshes[meshStr].create();
 
-            _bmpOutdated = true;
-
+            lock( _inputLock)
+            {
+                _bmpOutdated = true;
+            }
+            
             HideButtons();
         }
 
@@ -259,6 +270,7 @@ namespace Viewer
             btnShow.Show();
 
             cbMeshes.Hide();
+            cbModels.Hide();
         }
 
         private void ShowButtons()
@@ -266,6 +278,25 @@ namespace Viewer
             btnShow.Hide();
 
             cbMeshes.Show();
+            cbModels.Show();
+        }
+
+        private void cbModels_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var model = (string)((ComboBox)sender).SelectedItem;
+
+            _builder = ObjFileParser.Parse(PATH + model);
+
+            FilterMeshes();
+
+            HideButtons();
+        }
+
+        private void FilterMeshes()
+        {
+            var conf = _builder.BuildConfig();
+
+            cbMeshes.DataSource = _meshes.Where(m => conf.Is(m.Value.conf)).Select(c => c.Key).ToList();
         }
     }
 }

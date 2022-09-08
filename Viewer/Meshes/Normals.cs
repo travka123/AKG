@@ -8,39 +8,36 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using AKG.ObjReader;
 
 namespace AKG.Viewer.Meshes
 {
-    public class NCube : Mesh
+    public class Normals : Mesh
     {
-        private Attributes[] _vertices = null!;
+        public static readonly List<ObjModelAttr> Layout = new() {
+            ObjModelAttr.Position,
+            ObjModelAttr.Normal,
+        };
 
-        private Renderer<Attributes, Uniforms> _renderer;
+        public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout);
 
-        private Primitives _primitive = Primitives.TRIANGLE_LINES;
+        public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
 
-        struct Attributes
+        private struct Attributes
         {
             public Vector4 position;
             public Vector3 normal;
         }
 
-        struct Uniforms
-        {
-            public VCamera camera;
-        }
+        private Attributes[] _vertices = null!;
 
-        private Uniforms _uniforms;
+        private Renderer<Attributes, Uniforms> _renderer;
 
-        public NCube()
+        public Normals(ObjModelBuilder builder)
         {
-            _vertices = ObjFileParser.Parse("../../../../ObjFiles/cube.obj").BuildFlat<Attributes>();
+            _vertices = builder.BuildFlatByConfig<Attributes>(ModelBuildConfig);
 
             var shader = new ShaderProgram<Attributes, Uniforms>();
-
-            var lightSourseColor = new Vector4(1.0f, 0.5f, 0.2f, 1.0f);
-
-            var lightSoursePosition= new Vector4(10f, 0.5f, 10f, 1.0f);
 
             shader.vertexShader = (vi) =>
             {
@@ -63,11 +60,9 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public override void Draw(Vector4[,] colors, float[,] zBuffer, VCamera camera)
+        public override void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
         {
-            _uniforms.camera = camera;
-
-            _renderer.Draw(colors, zBuffer, _primitive, _vertices, _uniforms);
+            _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms);
         }
     }
 }
