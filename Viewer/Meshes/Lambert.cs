@@ -74,7 +74,7 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public override void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
+        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
         {
             _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms);
         }

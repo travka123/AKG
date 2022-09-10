@@ -50,7 +50,7 @@ namespace Viewer
 
             _cameraControl = new FlyingCameraControls(camera, new Vector3(5, 0, 30));
 
-            var lights = new List<Light>() { new Light(new(10, 10, 10), new Vector3(1, 1, 1)) };
+            var lights = new List<LightBox>() { new LightBox(new(10, 10, 10), new Vector3(1, 1, 1)) };
 
             _uniforms = new Uniforms(camera, lights);
 
@@ -91,6 +91,11 @@ namespace Viewer
                         ClearZ(zBuffer);
 
                         _mesh.Draw(v4Colors, zBuffer, _uniforms);
+
+                        foreach (var light in _uniforms.lights)
+                        {
+                            light.Draw(v4Colors, zBuffer, _uniforms);
+                        }
 
                         var colors = GetBMPColors(v4Colors);
 

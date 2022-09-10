@@ -32,6 +32,12 @@ namespace Rendering
                 { "d", (s) => { } },
                 { "Ke", (s) => { } },
                 { "Ni", (s) => { } },
+                { "map_Kd", (s) => { } },
+                { "map_Ka", (s) => { } },
+                { "map_Bump", (s) => { } },
+                { "refl", (s) => { } },
+                { "Tf", (s) => { } },
+                { "Tr", (s) => { } },
             };
 
             var reader = new StreamReader(ms);

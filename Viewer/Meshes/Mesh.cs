@@ -3,8 +3,8 @@ using System.Numerics;
 
 namespace AKG.Viewer.Meshes
 {
-    public abstract class Mesh
+    public interface Mesh
     {
-        public abstract void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms);
+        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms);
     }
 }
