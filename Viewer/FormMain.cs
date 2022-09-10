@@ -46,7 +46,7 @@ namespace Viewer
 
             var camera = new VCamera();
 
-            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.1f, 1000f));
+            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 200f));
 
             _cameraControl = new FlyingCameraControls(camera, new Vector3(5, 0, 30));
 
@@ -114,12 +114,15 @@ namespace Viewer
                     lock (_inputLock)
                     {
                         var now = DateTime.Now;
+
                         _input.msDelta = (now - _input.time).Milliseconds;
                         _input.time = now;
+                        _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
 
                         _bmpOutdated |= _cameraControl.Process(_input);
 
                         _input.mouseOffset = Vector2.Zero;
+                        _input.mousePrevPosition = _input.mouseCurPosition;
                     }
                 }
             });
@@ -164,14 +167,22 @@ namespace Viewer
             }
         }
 
+        protected override void OnMouseEnter(EventArgs e)
+        {
+
+            lock (_inputLock)
+            {
+                _input.mousePrevPosition = _input.mouseCurPosition;
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             var location = new Vector2(e.X, e.Y);
 
             lock (_inputLock)
             {
-                _input.mouseOffset = location - _input.mousePosition;
-                _input.mousePosition = location;
+                _input.mouseCurPosition = location;
             }
         }
 
