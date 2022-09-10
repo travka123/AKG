@@ -48,6 +48,14 @@ namespace AKG.Camera.Controls
                     _pitch = -(float)Math.PI / 180 * 89;
                 }
 
+                if (_yaw > (float)Math.PI)
+                {
+                    _yaw = -2 * (float)Math.PI + _yaw;
+                } else if (Math.Abs(_yaw)  > (float)Math.PI)
+                {
+                    _yaw = 2 * (float)Math.PI + _yaw;
+                }
+
                 update = true;
             }
 
