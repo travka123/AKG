@@ -46,7 +46,7 @@ namespace Viewer
 
             var camera = new VCamera();
 
-            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, Width / Height, 0.1f, 1000f));
+            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.1f, 1000f));
 
             _cameraControl = new FlyingCameraControls(camera, new Vector3(5, 0, 30));
 
@@ -183,9 +183,7 @@ namespace Viewer
             {
                 if (_stretch)
                 {
-                    int fHeight = this.Height;
-                    int fWidth = this.Width;
-                    e.Graphics.DrawImage(_bmp, 0, 0, fWidth, fHeight);
+                    e.Graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
                 }
                 else
                 {
