@@ -24,8 +24,6 @@ namespace AKG.Viewer
 
         public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
 
-        private Matrix4x4 _m;
-
         public Vector3 Position { get; set; }
         public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
         public Vector3 Color { get; set; } 
@@ -44,8 +42,6 @@ namespace AKG.Viewer
             shaderProgram.fragmentShader = FragmentShader;
 
             _renderer = new Renderer<Vector4, Uniforms>(shaderProgram);
-
-            _m = Matrix4x4.CreateTranslation(Position);
         }
 
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)

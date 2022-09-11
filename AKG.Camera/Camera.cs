@@ -6,7 +6,6 @@ public class Camera : Positionable
 {
     private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
 
-
     public Matrix4x4 V { get; set; } = Matrix4x4.Identity;
     private Matrix4x4 _projection = Matrix4x4.Identity;
 

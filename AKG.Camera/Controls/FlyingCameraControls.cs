@@ -36,20 +36,26 @@ namespace AKG.Camera.Controls
             var direction = Vector3.Normalize(_positionable.Direction);
 
             _pitch = (float)Math.Asin(direction.Y);
+
             _yaw = (float)Math.Acos(direction.X / Math.Cos(_pitch)) * (direction.Z > 0 ? 1 : -1);
+
+            if (float.IsNaN(_pitch + _yaw))
+            {
+                Console.WriteLine();
+            }
 
             if (input.mouseBtn1Pressed && (input.mouseOffset.Length() != 0))
             {
                 _yaw += _rotationSpeed * input.mouseOffset.X;
                 _pitch -= _rotationSpeed * input.mouseOffset.Y;
 
-                if (_pitch > (float)Math.PI /180 * 89)
+                if (_pitch > (float)Math.PI /180 * 85)
                 {
-                    _pitch = (float)Math.PI / 180 * 89;
+                    _pitch = (float)Math.PI / 180 * 85;
                 }
-                else if (_pitch < -(float)Math.PI / 180 * 89)
+                else if (_pitch < -(float)Math.PI / 180 * 85)
                 {
-                    _pitch = -(float)Math.PI / 180 * 89;
+                    _pitch = -(float)Math.PI / 180 * 85;
                 }
 
                 if (_yaw > (float)Math.PI)
