@@ -57,8 +57,6 @@ namespace Viewer
 
             _entity = new Entity();
 
-            _controls = new FlyingCameraControls(camera);
-
             _uniforms = new Uniforms(camera, lights);
 
             var files = Directory.EnumerateFiles(PATH, "*.obj");

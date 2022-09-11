@@ -24,14 +24,19 @@ namespace AKG.Camera.Controls
 
         public FlyingCameraControls(Positionable positionable)
         {
-            _position = positionable.Position;
             _positionable = positionable;
-            Update();
         }
 
         public override bool Process(Input input)
         {
             bool update = false;
+
+            _position = _positionable.Position;
+
+            var direction = Vector3.Normalize(_positionable.Direction);
+
+            _pitch = (float)Math.Asin(direction.Y);
+            _yaw = (float)Math.Acos(direction.X / Math.Cos(_pitch)) * (direction.Z > 0 ? 1 : -1);
 
             if (input.mouseBtn1Pressed && (input.mouseOffset.Length() != 0))
             {
@@ -61,8 +66,6 @@ namespace AKG.Camera.Controls
             if (input.pressedKeys.Count != 0)
             {
                 Vector3 move = Vector3.Zero;
-
-                var direction = CreateDirection();
 
                 if (input.pressedKeys.Contains(87))
                 {
