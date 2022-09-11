@@ -32,9 +32,10 @@ namespace Rendering
                 { "d", (s) => { } },
                 { "Ke", (s) => { } },
                 { "Ni", (s) => { } },
-                { "map_Kd", (s) => { } },
-                { "map_Ka", (s) => { } },
+                { "map_Ka", (s) => builder.SetMapKa(s.Replace("\\\\", "\\")) },
+                { "map_Kd", (s) => builder.SetMapKd(s.Replace("\\\\", "\\")) },
                 { "map_Bump", (s) => { } },
+                { "map_bump", (s) => { } },
                 { "refl", (s) => { } },
                 { "Tf", (s) => { } },
                 { "Tr", (s) => { } },
@@ -95,5 +96,15 @@ namespace Rendering
                 return Parse(file, builder);
             }
         }
+
+        //private static void ParseMapKa(string s, ObjModelBuilder builder)
+        //{
+        //    var scale = new Vector3(1, 1, 1);
+
+        //    if (s.StartsWith("-s"))
+        //    {
+        //        scale = ParseVector3(s.Substring(2));
+        //    }
+        //}
     }
 }

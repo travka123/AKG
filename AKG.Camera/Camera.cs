@@ -2,7 +2,7 @@
 using System.Data;
 using System.Numerics;
 
-public class Camera : Positionable
+public class SCamera : Positionable
 {
     private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
 

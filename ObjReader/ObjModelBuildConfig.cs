@@ -9,10 +9,12 @@ namespace AKG.ObjReader
     public struct ObjModelBuildConfig
     {
         public List<ObjModelAttr> layout;
+        public bool texturesRequired;
 
-        public ObjModelBuildConfig(List<ObjModelAttr> layout)
+        public ObjModelBuildConfig(List<ObjModelAttr> layout, bool texturesRequired = false)
         {
             this.layout = layout;
+            this.texturesRequired = texturesRequired;
         }
     }
 }

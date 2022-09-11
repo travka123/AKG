@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Rendering
 {
@@ -91,6 +93,8 @@ namespace Rendering
             public Vector3 Ks;
             public int illum;
             public float Ns;
+            public string? mapKa;
+            public string? mapKd;
         }
 
         private Dictionary<string, Material> _materials = new();
@@ -142,6 +146,20 @@ namespace Rendering
             useNs = true;
         }
 
+        bool useTextures = false;
+
+        public void SetMapKa(string file)
+        {
+            useTextures = true;
+            _currentMaterial.mapKa = file;
+        }
+
+        public void SetMapKd(string file)
+        {
+            useTextures = true;
+            _currentMaterial.mapKd = file;
+        }
+
         public ObjModelConfig BuildConfig()
         {
             PushRegion();
@@ -163,6 +181,8 @@ namespace Rendering
             if (useIllum) result.Attributes.Add(ObjModelAttr.Illum);
 
             if (useNs) result.Attributes.Add(ObjModelAttr.Ns);
+
+            result.containTextures = useTextures;
 
             return result;
         }
@@ -196,6 +216,35 @@ namespace Rendering
                 pipeline += floatProviders[conf.layout[i]];
 
             return RunFlatPipe<T>(floats, pipeline);
+        }
+
+        public ObjModel<T>[] BuildByConfig<T>(ObjModelBuildConfig conf)
+        {
+            PushRegion();
+
+            var floats = new List<float>();
+            PipelineMethod pipeline;
+
+            var floatProviders = new Dictionary<ObjModelAttr, PipelineMethod>()
+            {
+                { ObjModelAttr.Position, AddPositions },
+                { ObjModelAttr.Normal, AddNormals },
+                { ObjModelAttr.TexCords, AddTexCords },
+                { ObjModelAttr.Ka, AddKa },
+                { ObjModelAttr.Kd, AddKd },
+                { ObjModelAttr.Ks, AddKs },
+                { ObjModelAttr.Illum, AddIllum },
+                { ObjModelAttr.Ns, AddNs },
+            };
+
+            var keys = floatProviders.Keys.ToArray();
+
+            pipeline = floatProviders[conf.layout[0]];
+
+            for (int i = 1; i < conf.layout.Count; i++)
+                pipeline += floatProviders[conf.layout[i]];
+
+            return RunPipe<T>(pipeline);
         }
 
         private void AddPositions(List<float> floats, (int v, int tv, int nv) face, Material material)
@@ -274,6 +323,43 @@ namespace Rendering
             return Cast<T>(floats.ToArray());
         }
 
+        private ObjModel<T>[] RunPipe<T>(PipelineMethod pipeline)
+        {
+            var textures = new Dictionary<string, Image<Rgba32>>();
+
+            var models = new List<ObjModel<T>>();
+
+            foreach (var objFaces in regions)
+            {
+                var model = new ObjModel<T>();
+
+                var material = objFaces.mtl is not null ? _materials[objFaces.mtl] : _materials.Count > 0 ? _materials.First().Value : null;
+
+                model.name = objFaces.group;
+
+                model.mapKa = BufferLoad(material?.mapKa, textures);
+                model.mapKd = BufferLoad(material?.mapKd, textures);
+
+                var floats = new List<float>();
+
+                foreach (var faces in objFaces.faceLines)
+                {
+                    for (int i = 2; i < faces.Count; i++)
+                    {
+                        pipeline(floats, faces[0], material!);
+                        pipeline(floats, faces[i - 1], material!);
+                        pipeline(floats, faces[i], material!);
+                    }
+                }
+
+                model.attributes = Cast<T>(floats.ToArray());
+
+                models.Add(model);
+            }
+
+            return models.ToArray();
+        }
+
         private T[] Cast<T>(float[] data)
         {
             int structSize = Marshal.SizeOf(typeof(T));
@@ -289,6 +375,22 @@ namespace Rendering
             }
 
             return result;
+        }
+
+        private Image<Rgba32>? BufferLoad(string? file, Dictionary<string, Image<Rgba32>> buffer)
+        {
+            if (file is null)
+                return null;
+
+            var image = buffer.GetValueOrDefault(file);
+
+            if (image is null)
+            {
+                image = Image.Load<Rgba32>(Path + '\\' + file);
+                buffer[file] = image;
+            }
+
+            return image;
         }
     }
 }

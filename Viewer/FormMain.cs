@@ -49,7 +49,7 @@ namespace Viewer
 
             var lights = new List<LightBox>() { new LightBox(new(10, 10, 10), new Vector3(1, 1, 1)) };
 
-            var camera = new Camera();
+            var camera = new SCamera();
 
             camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 300f));
 
@@ -61,14 +61,17 @@ namespace Viewer
 
             _uniforms.ambientColor = new Vector3(0.3f, 0.3f, 0.3f);
 
-            var files = Directory.EnumerateFiles(PATH, "*.obj");
+            var opt = new EnumerationOptions();
+            opt.RecurseSubdirectories = true;
+            var files = Directory.EnumerateFiles(PATH, "*.obj", opt);
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
                 { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder!)) },
                 { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder!)) },
                 { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
-                { "phong", (Lambert.ModelBuildConfig, () => new Phong(_builder!)) },
+                { "phong", (Phong.ModelBuildConfig, () => new Phong(_builder!)) },
+                { "textured", (Textured.ModelBuildConfig, () => new Textured(_builder!)) },
             };
 
             _selectables = new Dictionary<string, Func<Positionable>>()

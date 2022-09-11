@@ -9,10 +9,11 @@ namespace AKG.ObjReader
     public class ObjModelConfig
     {
         public List<ObjModelAttr> Attributes { get; } = new(); 
+        public bool containTextures { get; set; }
 
         public bool Is(ObjModelBuildConfig bc)
         {
-            return bc.layout.All((comp) => Attributes.Contains(comp));
+            return bc.layout.All((comp) => Attributes.Contains(comp)) && (!bc.texturesRequired || (bc.texturesRequired && containTextures));
         }
     }
 }
