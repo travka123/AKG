@@ -56,9 +56,9 @@ namespace AKG.Viewer.Meshes
 
                     var w = Math.Max(Vector4.Dot(Vector4.Normalize(lightDir), Vector4.Normalize(normalsR)), 0);
 
-                    varying[0] += w * light.Color.X * vi.attribute.kd.X;
-                    varying[1] += w * light.Color.Y * vi.attribute.kd.Y;
-                    varying[2] += w * light.Color.Z * vi.attribute.kd.Z;
+                    varying[0] += w * light.ColorDiffuse.X * vi.attribute.kd.X;
+                    varying[1] += w * light.ColorDiffuse.Y * vi.attribute.kd.Y;
+                    varying[2] += w * light.ColorDiffuse.Z * vi.attribute.kd.Z;
                 }
 
                 for (int i = 0; i < 3; i++)

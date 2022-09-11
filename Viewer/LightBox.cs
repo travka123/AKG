@@ -26,7 +26,8 @@ namespace AKG.Viewer
 
         public Vector3 Position { get; set; }
         public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
-        public Vector3 Color { get; set; } 
+        public Vector3 ColorDiffuse { get; set; } 
+        public Vector3 ColorSpecular { get; set; } 
 
         public LightBox(Vector3 position, Vector3 color)
         {
@@ -35,7 +36,9 @@ namespace AKG.Viewer
             _vertices = ObjFileParser.Parse("..\\..\\..\\..\\ObjFiles\\zLightBox.obj").BuildFlatByConfig<Vector4>(config);
 
             Position = position;
-            Color = color;
+
+            ColorDiffuse = color;
+            ColorSpecular = color;
 
             var shaderProgram = new ShaderProgram<Vector4, Uniforms>();
             shaderProgram.vertexShader = VertexShader;
@@ -58,7 +61,7 @@ namespace AKG.Viewer
 
         private FragmentShaderOutput FragmentShader(FragmentShaderInput<Uniforms> fi)
         {
-            return new(new Vector4(Color.X, Color.Y, Color.Z, 1.0f));
+            return new(new Vector4(ColorDiffuse.X, ColorDiffuse.Y, ColorDiffuse.Z, 1.0f));
         }
 
         public void SetPosition(Vector3 position)

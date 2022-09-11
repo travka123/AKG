@@ -59,6 +59,8 @@ namespace Viewer
 
             _uniforms = new Uniforms(camera, lights);
 
+            _uniforms.ambientColor = new Vector3(0.3f, 0.3f, 0.3f);
+
             var files = Directory.EnumerateFiles(PATH, "*.obj");
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
@@ -66,6 +68,7 @@ namespace Viewer
                 { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder!)) },
                 { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder!)) },
                 { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
+                { "phong", (Lambert.ModelBuildConfig, () => new Phong(_builder!)) },
             };
 
             _selectables = new Dictionary<string, Func<Positionable>>()

@@ -9,6 +9,7 @@ namespace AKG.Viewer
         public List<LightBox> lights;
         public Matrix4x4 MVP;
         public Matrix4x4 M;
+        public Vector3 ambientColor;
 
         public Uniforms(global::Camera camera, List<LightBox> lights)
         {
@@ -20,6 +21,7 @@ namespace AKG.Viewer
         {
             camera = uniforms.camera;
             lights = uniforms.lights;
+            ambientColor = uniforms.ambientColor;
             this.M = M;
             MVP = M * camera.VP;
         }
