@@ -46,6 +46,7 @@ namespace AKG.Viewer.Meshes
                 var positionVP = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
                 var positionM = Vector4.Transform(vi.attribute.position, vi.uniforms.M);
+                var normalsM = Vector3.Transform(vi.attribute.normals, vi.uniforms.M);
 
                 var varying = new float[3];
 
@@ -53,7 +54,7 @@ namespace AKG.Viewer.Meshes
                 {
                     var lightDir = light.Position - new Vector3(positionM.X, positionM.Y, positionM.Z);
 
-                    var w = Math.Max(Vector3.Dot(Vector3.Normalize(lightDir), Vector3.Normalize(vi.attribute.normals)), 0);
+                    var w = Math.Max(Vector3.Dot(Vector3.Normalize(lightDir), Vector3.Normalize(normalsM)), 0);
 
                     varying[0] += w * light.Color.X * vi.attribute.kd.X;
                     varying[1] += w * light.Color.Y * vi.attribute.kd.Y;

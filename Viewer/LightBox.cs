@@ -34,7 +34,7 @@ namespace AKG.Viewer
         {
             var config = new ObjModelBuildConfig(new() { ObjModelAttr.Position });
 
-            _vertices = ObjFileParser.Parse("..\\..\\..\\..\\ObjFiles\\cube.obj").BuildFlatByConfig<Vector4>(config);
+            _vertices = ObjFileParser.Parse("..\\..\\..\\..\\ObjFiles\\zLightBox.obj").BuildFlatByConfig<Vector4>(config);
 
             Position = position;
             Color = color;
@@ -51,7 +51,7 @@ namespace AKG.Viewer
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
         {
             _renderer.Draw(colors, zBuffer, Primitive, _vertices,
-                new Uniforms(uniforms, Matrix4x4.CreateScale(0.1f) * Matrix4x4.CreateWorld(Position, Direction, _up)));
+                new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)));
         }
 
         private VertexShaderOutput VertexShader(VertexShaderInput<Vector4, Uniforms> vi)
