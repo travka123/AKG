@@ -354,22 +354,22 @@ namespace Viewer
 
         private void cbModels_KeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void cbMeshes_KeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void cbSelectedMesh_KeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void btnShow_KeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
     }
 }
