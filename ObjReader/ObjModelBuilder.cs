@@ -15,6 +15,7 @@ namespace Rendering
     public class ObjModelBuilder
     {
         public string Path { get; set; }
+        public string FileName { get; set; }
 
         private List<Vector4> _gVertices = new();
         private List<Vector3> _nVertices = new();
@@ -261,19 +262,11 @@ namespace Rendering
 
                 foreach (var faces in objFaces.faceLines)
                 {
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 2; i < faces.Count; i++)
                     {
+                        pipeline(floats, faces[0], material!);
+                        pipeline(floats, faces[i - 1], material!);
                         pipeline(floats, faces[i], material!);
-                    }
-
-                    for (int i = 3; i < faces.Count; i++)
-                    {
-                        for (int j = i - 1; j >= 1; j--)
-                        {
-                            pipeline(floats, faces[i - j - 1], material!);
-                            pipeline(floats, faces[i - j], material!);
-                            pipeline(floats, faces[i], material!);
-                        }
                     }
                 }
             }

@@ -28,6 +28,7 @@ namespace AKG.Rendering.Rasterisation
             }
 
             voTriangles = ClipTriangles(voTriangles, canvasW, canvasH);
+            voTriangles = CullingTriangles(voTriangles);
 
             object drawLocker = new object();
 
@@ -45,12 +46,19 @@ namespace AKG.Rendering.Rasterisation
                     float xNDCL = Math.Abs(a.position.X - b.position.X);
                     float yNDCL = Math.Abs(a.position.Y - b.position.Y);
 
-                    int L = xl > yl ? xl : yl;
+                    int L = xl > yl ? xl : yl;        
 
                     float xNDCStep = xNDCL / L;
                     float yNDCStep = yNDCL / L;
+
                     xNDCStep = a.position.X < b.position.X ? xNDCStep : -xNDCStep;
                     yNDCStep = a.position.Y < b.position.Y ? yNDCStep : -yNDCStep;
+
+                    if (L == 0)
+                    {
+                        xNDCStep = 0.0f;
+                        yNDCStep = 0.0f;
+                    }
 
                     for (int i = 0; i <= L; i++)
                     {
@@ -162,6 +170,18 @@ namespace AKG.Rendering.Rasterisation
             };
 
             return vo.Where((vo) => vo.All((vo) => checkVec(vo.position))).ToList();
+        }
+
+        private List<VertexShaderOutput[]> CullingTriangles(List<VertexShaderOutput[]> vo)
+        {
+            var isCounterClockWise = (VertexShaderOutput[] triangle) =>
+            {
+                return triangle[0].position.X * triangle[1].position.Y - triangle[1].position.X * triangle[0].position.Y +
+                triangle[1].position.X * triangle[2].position.Y - triangle[2].position.X * triangle[1].position.Y +
+                triangle[2].position.X * triangle[0].position.Y - triangle[0].position.X * triangle[2].position.Y > 0;
+
+            };
+            return vo.Where((vo) => isCounterClockWise(vo)).ToList();
         }
     }
 }

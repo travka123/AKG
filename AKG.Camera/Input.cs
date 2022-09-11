@@ -12,7 +12,8 @@ namespace AKG.Camera
         public int msDelta = 0;
         public DateTime time = new();
         public HashSet<int> pressedKeys = new();
-        public Vector2 mousePosition = new();
+        public Vector2 mousePrevPosition = new();
+        public Vector2 mouseCurPosition = new();
         public Vector2 mouseOffset = new();
         public bool mouseBtn1Pressed = false;
 

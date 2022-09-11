@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AKG.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -12,19 +13,19 @@ namespace AKG.Camera.Controls
         private static readonly Vector3 _up = new Vector3(0, 1, 0);
 
         private float _moveSpeed = 0.01f;
-        private float _rotationSpeed = 0.0018f;
+        private float _rotationSpeed = 0.0025f;
 
-        private VCamera _camera;
+        private Positionable _positionable;
 
         private float _yaw = -(float)Math.PI / 180 * 90;
         private float _pitch = 0;
 
         private Vector3 _position;
 
-        public FlyingCameraControls(VCamera camera, Vector3 position)
+        public FlyingCameraControls(Positionable positionable)
         {
-            _position = position;
-            _camera = camera;
+            _position = positionable.Position;
+            _positionable = positionable;
             Update();
         }
 
@@ -32,12 +33,10 @@ namespace AKG.Camera.Controls
         {
             bool update = false;
 
-            if (input.mouseBtn1Pressed && (input.mouseOffset != Vector2.Zero))
+            if (input.mouseBtn1Pressed && (input.mouseOffset.Length() != 0))
             {
-                var nOffset = Vector2.Normalize(input.mouseOffset) * input.mouseOffset.Length();
-
-                _yaw += _rotationSpeed * nOffset.X * input.msDelta;
-                _pitch -= _rotationSpeed * nOffset.Y * input.msDelta;
+                _yaw += _rotationSpeed * input.mouseOffset.X;
+                _pitch -= _rotationSpeed * input.mouseOffset.Y;
 
                 if (_pitch > (float)Math.PI /180 * 89)
                 {
@@ -91,6 +90,8 @@ namespace AKG.Camera.Controls
                     update = true;
                 }
 
+                move = Vector3.Zero;
+
                 if (input.pressedKeys.Contains(32))
                 {
                     move += _up;
@@ -124,7 +125,10 @@ namespace AKG.Camera.Controls
 
         private void Update()
         {
-            _camera.SetView(Matrix4x4.CreateLookAt(_position, _position + CreateDirection(), _up));
+            _positionable.SetPosition(_position);
+
+            var direction = CreateDirection();
+            _positionable.SetDirection(direction);
         }
     }
 }

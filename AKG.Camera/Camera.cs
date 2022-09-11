@@ -1,40 +1,60 @@
-﻿using System.Data;
+﻿using AKG.Components;
+using System.Data;
 using System.Numerics;
 
-namespace AKG.Camera
+public class Camera : Positionable
 {
-    public class VCamera
+    private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
+
+
+    public Matrix4x4 V { get; set; } = Matrix4x4.Identity;
+    private Matrix4x4 _projection = Matrix4x4.Identity;
+
+    public Matrix4x4 VP { get; private set; } = Matrix4x4.Identity;
+
+    public Vector3 Position { get; private set; }
+
+    private bool _positionChanged = false;
+
+    public Vector3 Direction { get; private set; } = new Vector3(0, 0, -1);
+
+    private bool _directionChanged = false;
+
+    public void SetProjection(Matrix4x4 projection)
     {
-        private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
+        _projection = projection;
 
-        public Matrix4x4 V { get; set; } = Matrix4x4.Identity;
-        private Matrix4x4 _projection = Matrix4x4.Identity;
+        Update();
+    }
 
-        public Matrix4x4 VP { get; private set; } = Matrix4x4.Identity;
+    private void Update()
+    {
+        VP = V * _projection;
+    }
 
-        public void SetProjection(Matrix4x4 projection)
-        {
-            _projection = projection;
-            Update();
-        }
+    public static Matrix4x4 CreatePerspectiveFieldOfView(float fovy, float aspect)
+    {
+        const float NEAR = 0.1f;
+        const float FAR = 100.0f;
 
-        public void SetView(Matrix4x4 view)
-        {
-            V = view;
-            Update();
-        }
+        return Matrix4x4.CreatePerspectiveFieldOfView(fovy, aspect, NEAR, FAR);
+    }
 
-        private void Update()
-        {
-            VP =  V * _projection;
-        }
+    public void SetPosition(Vector3 position)
+    {
+        Position = position;
 
-        public static Matrix4x4 CreatePerspectiveFieldOfView(float fovy, float aspect)
-        {
-            const float NEAR = 0.1f;
-            const float FAR = 100.0f;
+        V = Matrix4x4.CreateLookAt(Position, Position + Direction, _up);
 
-            return Matrix4x4.CreatePerspectiveFieldOfView(fovy, aspect, NEAR, FAR);
-        }
+        Update();
+    }
+
+    public void SetDirection(Vector3 direction)
+    {
+        Direction = direction;
+
+        V = Matrix4x4.CreateLookAt(Position, Position + Direction, _up);
+
+        Update();
     }
 }

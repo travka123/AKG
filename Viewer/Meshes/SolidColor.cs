@@ -35,7 +35,7 @@ namespace AKG.Viewer.Meshes
 
             shader.vertexShader = (vi) =>
             {
-                var position = Vector4.Transform(vi.attribute, vi.uniforms.camera.VP);
+                var position = Vector4.Transform(vi.attribute, vi.uniforms.MVP);
                 return new(position, Array.Empty<float>());
             };
 

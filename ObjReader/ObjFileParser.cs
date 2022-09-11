@@ -87,6 +87,7 @@ namespace Rendering
             {
                 builder = new ObjModelBuilder();
                 builder.Path = Path.GetDirectoryName(path)!;
+                builder.FileName = Path.GetFileName(path).Replace(".obj", "")!;
             }
 
             using (var file = File.OpenRead(path))

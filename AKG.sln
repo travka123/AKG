@@ -9,14 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.Rendering", "Rendering\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader", "ObjReader\AKG.ObjReader.csproj", "{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.ObjReader.Testing", "AKG.ObjReader.Testing\AKG.ObjReader.Testing.csproj", "{6E8FC726-3A86-4887-AB04-BA4B26B0776F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKG.Camera", "AKG.Camera\AKG.Camera.csproj", "{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{72CE7EE6-C74C-4A5E-AA7A-944E1F4DCFDA}"
 	ProjectSection(SolutionItems) = preProject
 		ObjFiles\Lowpoly_tree_sample.obj = ObjFiles\Lowpoly_tree_sample.obj
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKG.Components", "AKG.Components\AKG.Components.csproj", "{69CA3591-EA17-4FC6-BBD3-BBE1D7702AAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,14 +36,14 @@ Global
 		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D01C2D53-FC4E-4C79-9F5C-3D90BB1D4C05}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E8FC726-3A86-4887-AB04-BA4B26B0776F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{759025FD-3D69-46FD-97E5-4E9DBD8BC8DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69CA3591-EA17-4FC6-BBD3-BBE1D7702AAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69CA3591-EA17-4FC6-BBD3-BBE1D7702AAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69CA3591-EA17-4FC6-BBD3-BBE1D7702AAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69CA3591-EA17-4FC6-BBD3-BBE1D7702AAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

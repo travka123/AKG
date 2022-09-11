@@ -1,5 +1,6 @@
 using AKG.Camera;
 using AKG.Camera.Controls;
+using AKG.Components;
 using AKG.ObjReader;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
@@ -28,13 +29,15 @@ namespace Viewer
 
         private Uniforms _uniforms;
 
-        private CameraControl _cameraControl;
+        private CameraControl _controls;
 
-        private Mesh _mesh;
+        private Entity _entity;
 
         private Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)> _meshes;
 
         private ObjModelBuilder _builder;
+
+        private Dictionary<string, Func<Positionable>> _selectables;
 
         public FormMain()
         {
@@ -44,17 +47,21 @@ namespace Viewer
 
             _input = new();
 
-            var camera = new VCamera();
+            var lights = new List<LightBox>() { new LightBox(new(10, 10, 10), new Vector3(1, 1, 1)) };
+
+            var camera = new Camera();
 
             camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 200f));
 
-            _cameraControl = new FlyingCameraControls(camera, new Vector3(5, 0, 30));
+            camera.SetPosition(new Vector3(5, 0, 30));
 
-            var lights = new List<LightBox>() { new LightBox(new(10, 10, 10), new Vector3(1, 1, 1)) };
+            _entity = new Entity();
+
+            _controls = new FlyingCameraControls(camera);
 
             _uniforms = new Uniforms(camera, lights);
 
-            var files = Directory.EnumerateFiles(PATH, "*.obj"); 
+            var files = Directory.EnumerateFiles(PATH, "*.obj");
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
@@ -63,7 +70,15 @@ namespace Viewer
                 { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
             };
 
+            _selectables = new Dictionary<string, Func<Positionable>>()
+            {
+                { "camera", () => _uniforms.camera },
+                { "light", () => lights[0] },
+                { "mesh", () => _entity },
+            };
+
             cbModels.DataSource = files.Select(f => f.Substring(PATH.Length)).ToList();
+            cbSelectedMesh.DataSource = _selectables.Keys.ToList();
         }
 
         private volatile bool _bmpOutdated = true;
@@ -79,7 +94,7 @@ namespace Viewer
                 Vector4[,] v4Colors = new Vector4[Height, Width];
                 float[,] zBuffer = new float[Height, Width];
 
-                while (_mesh is null) { Thread.Sleep(0); }
+                while (_entity is null) { Thread.Sleep(0); }
 
                 while (true)
                 {
@@ -90,7 +105,7 @@ namespace Viewer
                         Clear(v4Colors);
                         ClearZ(zBuffer);
 
-                        _mesh.Draw(v4Colors, zBuffer, _uniforms);
+                        _entity.Draw(v4Colors, zBuffer, _uniforms);
 
                         foreach (var light in _uniforms.lights)
                         {
@@ -119,7 +134,7 @@ namespace Viewer
                         _input.time = now;
                         _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
 
-                        _bmpOutdated |= _cameraControl.Process(_input);
+                        _bmpOutdated |= _controls.Process(_input);
 
                         _input.mouseOffset = Vector2.Zero;
                         _input.mousePrevPosition = _input.mouseCurPosition;
@@ -142,7 +157,6 @@ namespace Viewer
             {
                 _input.pressedKeys.Remove(e.KeyValue);
             }
-
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
@@ -264,13 +278,13 @@ namespace Viewer
         {
             var meshStr = (string)((ComboBox)sender).SelectedItem;
 
-            _mesh = _meshes[meshStr].create();
+            _entity.SetMesh(_meshes[meshStr].create());
 
-            lock( _inputLock)
+            lock (_inputLock)
             {
                 _bmpOutdated = true;
             }
-            
+
             HideButtons();
         }
 
@@ -285,6 +299,7 @@ namespace Viewer
 
             cbMeshes.Hide();
             cbModels.Hide();
+            cbSelectedMesh.Hide();
         }
 
         private void ShowButtons()
@@ -293,6 +308,7 @@ namespace Viewer
 
             cbMeshes.Show();
             cbModels.Show();
+            cbSelectedMesh.Show();
         }
 
         private void cbModels_SelectedIndexChanged(object sender, EventArgs e)
@@ -311,6 +327,13 @@ namespace Viewer
             var conf = _builder.BuildConfig();
 
             cbMeshes.DataSource = _meshes.Where(m => conf.Is(m.Value.conf)).Select(c => c.Key).ToList();
+        }
+
+        private void cbSelectedMesh_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var positionable = _selectables[(string)((ComboBox)sender).SelectedItem]();
+
+            _controls = new FlyingCameraControls(positionable);
         }
     }
 }

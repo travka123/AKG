@@ -1,4 +1,5 @@
-﻿using AKG.ObjReader;
+﻿using AKG.Components;
+using AKG.ObjReader;
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
 using AKG.Rendering.ShaderIO;
@@ -13,8 +14,10 @@ using System.Threading.Tasks;
 
 namespace AKG.Viewer
 {
-    public class LightBox : Mesh, Light
+    public class LightBox : Mesh, Light, Positionable
     {
+        private static readonly Vector3 _up = new Vector3(0.0f, 1.0f, 0.0f);
+
         private Renderer<Vector4, Uniforms> _renderer;
 
         private Vector4[] _vertices;
@@ -22,6 +25,10 @@ namespace AKG.Viewer
         public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
 
         private Matrix4x4 _m;
+
+        public Vector3 Position { get; set; }
+        public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
+        public Vector3 Color { get; set; } 
 
         public LightBox(Vector3 position, Vector3 color)
         {
@@ -41,13 +48,10 @@ namespace AKG.Viewer
             _m = Matrix4x4.CreateTranslation(Position);
         }
 
-        public Vector3 Position { get; set; }
-        public Vector3 Color { get; set; }
-
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
         {
-            _renderer.Draw(colors, zBuffer, Primitive, _vertices, new Uniforms(uniforms,
-                Matrix4x4.CreateScale(0.1f) * Matrix4x4.CreateTranslation(Position) * uniforms.camera.VP));
+            _renderer.Draw(colors, zBuffer, Primitive, _vertices,
+                new Uniforms(uniforms, Matrix4x4.CreateScale(0.1f) * Matrix4x4.CreateWorld(Position, Direction, _up)));
         }
 
         private VertexShaderOutput VertexShader(VertexShaderInput<Vector4, Uniforms> vi)
@@ -59,6 +63,16 @@ namespace AKG.Viewer
         private FragmentShaderOutput FragmentShader(FragmentShaderInput<Uniforms> fi)
         {
             return new(new Vector4(Color.X, Color.Y, Color.Z, 1.0f));
+        }
+
+        public void SetPosition(Vector3 position)
+        {
+            Position = position;
+        }
+
+        public void SetDirection(Vector3 direction)
+        {
+            Direction = direction;
         }
     }
 }

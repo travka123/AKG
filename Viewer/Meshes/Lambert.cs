@@ -43,9 +43,9 @@ namespace AKG.Viewer.Meshes
 
             shader.vertexShader = (vi) =>
             {
-                var positionVP = Vector4.Transform(vi.attribute.position, vi.uniforms.camera.VP);
+                var positionVP = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
-                var positionM = vi.attribute.position;
+                var positionM = Vector4.Transform(vi.attribute.position, vi.uniforms.M);
 
                 var varying = new float[3];
 

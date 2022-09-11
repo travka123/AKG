@@ -32,6 +32,7 @@
             this.btnShow = new System.Windows.Forms.Button();
             this.cbModels = new System.Windows.Forms.ComboBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.cbSelectedMesh = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // cbMeshes
@@ -73,11 +74,22 @@
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
             // 
+            // cbSelectedMesh
+            // 
+            this.cbSelectedMesh.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSelectedMesh.FormattingEnabled = true;
+            this.cbSelectedMesh.Location = new System.Drawing.Point(491, 70);
+            this.cbSelectedMesh.Name = "cbSelectedMesh";
+            this.cbSelectedMesh.Size = new System.Drawing.Size(121, 23);
+            this.cbSelectedMesh.TabIndex = 4;
+            this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(624, 601);
+            this.Controls.Add(this.cbSelectedMesh);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.cbModels);
             this.Controls.Add(this.cbMeshes);
@@ -94,5 +106,6 @@
         private Button btnShow;
         private ComboBox cbModels;
         private Button button1;
+        private ComboBox cbSelectedMesh;
     }
 }

@@ -41,7 +41,7 @@ namespace AKG.Viewer.Meshes
 
             shader.vertexShader = (vi) =>
             {
-                var PVposition = Vector4.Transform(vi.attribute.position, vi.uniforms.camera.VP);
+                var position = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
                 float[] varying = new float[3];
 
@@ -49,7 +49,7 @@ namespace AKG.Viewer.Meshes
                 varying[1] = Math.Max(vi.attribute.normal.Y, 0);
                 varying[2] = Math.Max(vi.attribute.normal.Z, 0);
 
-                return new(PVposition, varying);
+                return new(position, varying);
             };
 
             shader.fragmentShader = (fi) =>
