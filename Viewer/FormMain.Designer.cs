@@ -31,7 +31,6 @@
             this.cbMeshes = new System.Windows.Forms.ComboBox();
             this.btnShow = new System.Windows.Forms.Button();
             this.cbModels = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.cbSelectedMesh = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
@@ -39,64 +38,68 @@
             // 
             this.cbMeshes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbMeshes.FormattingEnabled = true;
-            this.cbMeshes.Location = new System.Drawing.Point(491, 41);
+            this.cbMeshes.Location = new System.Drawing.Point(701, 68);
+            this.cbMeshes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbMeshes.Name = "cbMeshes";
-            this.cbMeshes.Size = new System.Drawing.Size(121, 23);
+            this.cbMeshes.Size = new System.Drawing.Size(171, 33);
             this.cbMeshes.TabIndex = 0;
+            this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
+            this.cbMeshes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbMeshes_KeyDown);
             // 
             // btnShow
             // 
-            this.btnShow.Location = new System.Drawing.Point(551, 21);
+            this.btnShow.Location = new System.Drawing.Point(787, 35);
+            this.btnShow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnShow.Name = "btnShow";
-            this.btnShow.Size = new System.Drawing.Size(52, 23);
-            this.btnShow.TabIndex = 2;
+            this.btnShow.Size = new System.Drawing.Size(74, 38);
+            this.btnShow.TabIndex = 0;
+            this.btnShow.TabStop = false;
             this.btnShow.Text = "SHOW";
             this.btnShow.UseVisualStyleBackColor = true;
             this.btnShow.Click += new System.EventHandler(this.button1_Click);
+            this.btnShow.KeyDown += new System.Windows.Forms.KeyEventHandler(this.btnShow_KeyDown);
             // 
             // cbModels
             // 
             this.cbModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbModels.FormattingEnabled = true;
-            this.cbModels.Location = new System.Drawing.Point(491, 12);
+            this.cbModels.Location = new System.Drawing.Point(701, 20);
+            this.cbModels.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbModels.Name = "cbModels";
-            this.cbModels.Size = new System.Drawing.Size(121, 23);
-            this.cbModels.TabIndex = 3;
+            this.cbModels.Size = new System.Drawing.Size(171, 33);
+            this.cbModels.TabIndex = 0;
+            this.cbModels.TabStop = false;
             this.cbModels.SelectedIndexChanged += new System.EventHandler(this.cbModels_SelectedIndexChanged);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(18, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.cbModels.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbModels_KeyDown);
             // 
             // cbSelectedMesh
             // 
             this.cbSelectedMesh.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSelectedMesh.FormattingEnabled = true;
-            this.cbSelectedMesh.Location = new System.Drawing.Point(491, 70);
+            this.cbSelectedMesh.Location = new System.Drawing.Point(701, 117);
+            this.cbSelectedMesh.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbSelectedMesh.Name = "cbSelectedMesh";
-            this.cbSelectedMesh.Size = new System.Drawing.Size(121, 23);
-            this.cbSelectedMesh.TabIndex = 4;
+            this.cbSelectedMesh.Size = new System.Drawing.Size(171, 33);
+            this.cbSelectedMesh.TabIndex = 0;
+            this.cbSelectedMesh.TabStop = false;
             this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
+            this.cbSelectedMesh.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbSelectedMesh_KeyDown);
             // 
             // FormMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(624, 601);
+            this.ClientSize = new System.Drawing.Size(891, 1002);
             this.Controls.Add(this.cbSelectedMesh);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.cbModels);
             this.Controls.Add(this.cbMeshes);
             this.Controls.Add(this.btnShow);
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FormMain";
             this.Text = "Hello world";
+            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.FormMain_PreviewKeyDown);
             this.ResumeLayout(false);
 
         }
@@ -105,7 +108,6 @@
         private ComboBox cbMeshes;
         private Button btnShow;
         private ComboBox cbModels;
-        private Button button1;
         private ComboBox cbSelectedMesh;
     }
 }
