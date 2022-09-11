@@ -51,7 +51,7 @@ namespace Viewer
 
             var camera = new Camera();
 
-            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 200f));
+            camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 300f));
 
             camera.SetPosition(new Vector3(5, 0, 30));
 
@@ -334,6 +334,8 @@ namespace Viewer
             var positionable = _selectables[(string)((ComboBox)sender).SelectedItem]();
 
             _controls = new FlyingCameraControls(positionable);
+
+            HideButtons();
         }
     }
 }
