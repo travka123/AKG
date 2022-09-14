@@ -19,7 +19,7 @@ namespace AKG.Rendering
             _shader = shaderProgram;
         }
 
-        public void Draw(Vector4[,] canvas, float[,] zBuffer, Primitives primitive, A[] attributes, U uniforms)
+        public void Draw(Vector4[,] canvas, float[,] zBuffer, Primitives primitive, A[] attributes, U uniforms, RenderingOptions options)
         {
             var vo = attributes.AsParallel().Select((a) => _shader.vertexShader(new(a, uniforms))).ToArray();
 
@@ -29,7 +29,7 @@ namespace AKG.Rendering
                 vo[i].position = position / position.W;
             }
 
-            rasterizations[primitive].Rasterize(canvas, zBuffer, vo, _shader, uniforms);
+            rasterizations[primitive].Rasterize(canvas, zBuffer, vo, _shader, uniforms, options);
         }
     }
 }

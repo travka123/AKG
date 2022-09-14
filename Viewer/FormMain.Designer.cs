@@ -38,10 +38,10 @@
             // 
             this.cbMeshes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbMeshes.FormattingEnabled = true;
-            this.cbMeshes.Location = new System.Drawing.Point(701, 68);
-            this.cbMeshes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbMeshes.Location = new System.Drawing.Point(621, 52);
+            this.cbMeshes.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbMeshes.Name = "cbMeshes";
-            this.cbMeshes.Size = new System.Drawing.Size(171, 33);
+            this.cbMeshes.Size = new System.Drawing.Size(140, 28);
             this.cbMeshes.TabIndex = 0;
             this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
@@ -49,10 +49,10 @@
             // 
             // btnShow
             // 
-            this.btnShow.Location = new System.Drawing.Point(787, 35);
-            this.btnShow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnShow.Location = new System.Drawing.Point(621, 28);
+            this.btnShow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnShow.Name = "btnShow";
-            this.btnShow.Size = new System.Drawing.Size(74, 38);
+            this.btnShow.Size = new System.Drawing.Size(140, 30);
             this.btnShow.TabIndex = 0;
             this.btnShow.TabStop = false;
             this.btnShow.Text = "SHOW";
@@ -64,10 +64,10 @@
             // 
             this.cbModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbModels.FormattingEnabled = true;
-            this.cbModels.Location = new System.Drawing.Point(701, 20);
-            this.cbModels.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbModels.Location = new System.Drawing.Point(621, 16);
+            this.cbModels.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbModels.Name = "cbModels";
-            this.cbModels.Size = new System.Drawing.Size(171, 33);
+            this.cbModels.Size = new System.Drawing.Size(140, 28);
             this.cbModels.TabIndex = 0;
             this.cbModels.TabStop = false;
             this.cbModels.SelectedIndexChanged += new System.EventHandler(this.cbModels_SelectedIndexChanged);
@@ -77,10 +77,10 @@
             // 
             this.cbSelectedMesh.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSelectedMesh.FormattingEnabled = true;
-            this.cbSelectedMesh.Location = new System.Drawing.Point(701, 117);
-            this.cbSelectedMesh.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.cbSelectedMesh.Location = new System.Drawing.Point(621, 88);
+            this.cbSelectedMesh.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbSelectedMesh.Name = "cbSelectedMesh";
-            this.cbSelectedMesh.Size = new System.Drawing.Size(171, 33);
+            this.cbSelectedMesh.Size = new System.Drawing.Size(140, 28);
             this.cbSelectedMesh.TabIndex = 0;
             this.cbSelectedMesh.TabStop = false;
             this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
@@ -88,15 +88,15 @@
             // 
             // FormMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(891, 1002);
+            this.ClientSize = new System.Drawing.Size(783, 527);
             this.Controls.Add(this.cbSelectedMesh);
             this.Controls.Add(this.cbModels);
             this.Controls.Add(this.cbMeshes);
             this.Controls.Add(this.btnShow);
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "FormMain";
             this.Text = "Hello world";
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.FormMain_PreviewKeyDown);

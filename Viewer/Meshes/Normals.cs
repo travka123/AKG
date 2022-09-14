@@ -60,9 +60,9 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms)
+        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
         {
-            _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms);
+            _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms, options);
         }
     }
 }

@@ -39,6 +39,8 @@ namespace Viewer
 
         private Dictionary<string, Func<Positionable>> _selectables;
 
+        private RenderingOptions _renderingOptions;
+
         public FormMain()
         {
             InitializeComponent();
@@ -60,6 +62,9 @@ namespace Viewer
             _uniforms = new Uniforms(camera, lights);
 
             _uniforms.ambientColor = new Vector3(0.3f, 0.3f, 0.3f);
+
+            _renderingOptions = new RenderingOptions();
+            _renderingOptions.FillTriangles = true;
 
             var opt = new EnumerationOptions();
             opt.RecurseSubdirectories = true;
@@ -98,6 +103,8 @@ namespace Viewer
                 Vector4[,] v4Colors = new Vector4[Height, Width];
                 float[,] zBuffer = new float[Height, Width];
 
+                List<int> wasPressed = new List<int>();
+
                 while (_entity is null) { Thread.Sleep(0); }
 
                 while (true)
@@ -109,11 +116,11 @@ namespace Viewer
                         Clear(v4Colors);
                         ClearZ(zBuffer);
 
-                        _entity.Draw(v4Colors, zBuffer, _uniforms);
+                        _entity.Draw(v4Colors, zBuffer, _uniforms, _renderingOptions);
 
                         foreach (var light in _uniforms.lights)
                         {
-                            light.Draw(v4Colors, zBuffer, _uniforms);
+                            light.Draw(v4Colors, zBuffer, _uniforms, _renderingOptions);
                         }
 
                         var colors = GetBMPColors(v4Colors);
@@ -134,6 +141,11 @@ namespace Viewer
                     {
                         var now = DateTime.Now;
 
+                        var keysDown = _input.pressedKeys.Where(i => !wasPressed.Contains(i)).ToList();
+
+                        wasPressed.Clear();
+                        wasPressed.AddRange(_input.pressedKeys);
+
                         _input.msDelta = (now - _input.time).Milliseconds;
                         _input.time = now;
                         _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
@@ -142,6 +154,12 @@ namespace Viewer
 
                         _input.mouseOffset = Vector2.Zero;
                         _input.mousePrevPosition = _input.mouseCurPosition;
+
+                        if (keysDown.Contains(120))
+                        {
+                            _renderingOptions.FillTriangles = !_renderingOptions.FillTriangles;
+                            _bmpOutdated = true;
+                        }
                     }
                 }
             });
@@ -187,7 +205,6 @@ namespace Viewer
 
         protected override void OnMouseEnter(EventArgs e)
         {
-
             lock (_inputLock)
             {
                 _input.mousePrevPosition = _input.mouseCurPosition;

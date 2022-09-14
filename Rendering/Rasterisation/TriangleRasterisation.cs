@@ -10,7 +10,7 @@ namespace AKG.Rendering.Rasterisation
 {
     public class TriangleRasterisation<A, U> : Rasterisation<A, U>
     {
-        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms)
+        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
         {
             int canvasH = canvas.GetLength(0);
             int canvasW = canvas.GetLength(1);
@@ -86,7 +86,7 @@ namespace AKG.Rendering.Rasterisation
                     }
                 };
 
-                if (true)
+                if (options.FillTriangles)
                 {
                     var boarders = new SortedDictionary<int, SortedDictionary<int, VertexShaderOutput>>();
 

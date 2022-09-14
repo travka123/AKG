@@ -12,7 +12,7 @@ namespace AKG.Rendering.Rasterisation
 {
     public class PointRasterisation<A, U> : Rasterisation<A, U>
     {
-        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms)
+        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
         {
             int canvasH = canvas.GetLength(0);
             int canvasW = canvas.GetLength(1);
