@@ -11,6 +11,7 @@ namespace AKG.Rendering
     public struct ShaderProgram<A, U>
     {
         public Func<VertexShaderInput<A, U>, VertexShaderOutput> vertexShader;
+        public Action<GeometryShaderInput<U>>? geometryShader;
         public Func<FragmentShaderInput<U>, FragmentShaderOutput> fragmentShader;
     }
 }

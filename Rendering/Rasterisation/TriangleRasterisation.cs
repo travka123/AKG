@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,6 +30,9 @@ namespace AKG.Rendering.Rasterisation
 
             voTriangles = ClipTriangles(voTriangles, canvasW, canvasH);
             voTriangles = CullingTriangles(voTriangles);
+
+            if (shader.geometryShader is not null)
+                Parallel.ForEach(voTriangles, (vo) => shader.geometryShader(new GeometryShaderInput<U>(vo, uniforms)));
 
             object drawLocker = new object();
 
