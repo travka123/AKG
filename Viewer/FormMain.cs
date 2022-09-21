@@ -318,7 +318,7 @@ namespace Viewer
         private void HideButtons()
         {
             btnShow.Show();
-
+            cbMeshes.Focus();
             cbMeshes.Hide();
             cbModels.Hide();
             cbSelectedMesh.Hide();
