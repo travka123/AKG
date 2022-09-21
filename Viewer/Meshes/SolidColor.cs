@@ -41,7 +41,7 @@ namespace AKG.Viewer.Meshes
 
             shader.fragmentShader = (fi) =>
             {
-                return new(new Vector4(1.0f, 0.5f, 0.2f, 1.0f));
+                return new(new Vector4(fi.uniforms.ambientColor.X, fi.uniforms.ambientColor.Y, fi.uniforms.ambientColor.Z, 1.0f));
             };
 
             _renderer = new Renderer<Vector4, Uniforms>(shader);

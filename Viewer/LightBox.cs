@@ -70,9 +70,9 @@ namespace AKG.Viewer
             bool isBorder = false;
             float border = 0.4f;
 
-            if (!(Math.Abs(position.X) > 0.49))
+            if (!(Math.Abs(position.X) == 0.5))
             {
-                if (!(Math.Abs(position.Y) > 0.49))
+                if (!(Math.Abs(position.Y) == 0.5))
                 {
                     isBorder = (Math.Abs(position.X) > border) || (Math.Abs(position.Y) > border);
                 }

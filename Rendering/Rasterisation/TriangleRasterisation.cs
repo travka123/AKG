@@ -40,41 +40,32 @@ namespace AKG.Rendering.Rasterisation
             {
                 var drawLine = (VertexShaderOutput a, VertexShaderOutput b, Action<int, int, Vector4, float[]> callback) =>
                 {
-                    var aPixel = ScreenCoordinates.PixelFromNDC(a.position, canvasW, canvasW);
-                    var bPixel = ScreenCoordinates.PixelFromNDC(b.position, canvasW, canvasW);
+                    var aPixel = ScreenCoordinates.PixelFromNDC(a.position, canvasW, canvasH);
+                    var bPixel = ScreenCoordinates.PixelFromNDC(b.position, canvasW, canvasH);
 
                     //DDA
 
                     int xl = Math.Abs((int)aPixel.X - (int)bPixel.X);
                     int yl = Math.Abs((int)aPixel.Y - (int)bPixel.Y);
-                    float xNDCL = Math.Abs(a.position.X - b.position.X);
-                    float yNDCL = Math.Abs(a.position.Y - b.position.Y);
 
-                    int L = xl > yl ? xl : yl;        
+                    int L = xl > yl ? xl : yl;
 
-                    float xNDCStep = xNDCL / L;
-                    float yNDCStep = yNDCL / L;
+                    float xNDCStep = (b.position.X - a.position.X) / L;
+                    float yNDCStep = (b.position.Y - a.position.Y) / L;
 
-                    xNDCStep = a.position.X < b.position.X ? xNDCStep : -xNDCStep;
-                    yNDCStep = a.position.Y < b.position.Y ? yNDCStep : -yNDCStep;
+                    float xPixelStep = (bPixel.X - aPixel.X) / L;
+                    float yPixelStep = (bPixel.Y - aPixel.Y) / L;
 
-                    if (L == 0)
-                    {
-                        xNDCStep = 0.0f;
-                        yNDCStep = 0.0f;
-                    }
-
-                    for (int i = 0; i <= L; i++)
+                    for (int i = 0; i < L; i++)
                     {
                         var ndc = new Vector4(a.position.X + xNDCStep * i, a.position.Y + yNDCStep * i, 0, 0);
                         ndc.Z = Interpolate(a.position, b.position, a.position.Z, b.position.Z, ndc);
                         ndc.W = Interpolate(a.position, b.position, a.position.W, b.position.W, ndc);
-
-                        var pixel = ScreenCoordinates.PixelFromNDC(ndc, canvasW, canvasH);
-                        int pixelX = (int)pixel.X;
-                        int pixelY = (int)pixel.Y;
                         
                         float[] varying = Interpolate(a.position, b.position, a.varying, b.varying, ndc);
+
+                        int pixelX = (int)(aPixel.X + i * xPixelStep);
+                        int pixelY = (int)(aPixel.Y + i * yPixelStep);
 
                         callback(pixelX, pixelY, ndc, varying);
                     }
