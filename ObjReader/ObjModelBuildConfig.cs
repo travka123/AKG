@@ -10,11 +10,13 @@ namespace AKG.ObjReader
     {
         public List<ObjModelAttr> layout;
         public bool texturesRequired;
+        public bool bumpMap;
 
-        public ObjModelBuildConfig(List<ObjModelAttr> layout, bool texturesRequired = false)
+        public ObjModelBuildConfig(List<ObjModelAttr> layout, bool texturesRequired = false, bool bumpMap = false)
         {
             this.layout = layout;
             this.texturesRequired = texturesRequired;
+            this.bumpMap = bumpMap;
         }
     }
 }

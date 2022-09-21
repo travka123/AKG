@@ -95,6 +95,8 @@ namespace Rendering
             public float Ns;
             public string? mapKa;
             public string? mapKd;
+            public string? mapKs;
+            public string? mapBump;
         }
 
         private Dictionary<string, Material> _materials = new();
@@ -160,6 +162,20 @@ namespace Rendering
             _currentMaterial.mapKd = file;
         }
 
+        public void SetMapKs(string file)
+        {
+            useTextures = true;
+            _currentMaterial.mapKs = file;
+        }
+
+        bool useBumpFile = false;
+
+        public void SetMapBump(string file)
+        {
+            useBumpFile = true;
+            _currentMaterial.mapBump = file;
+        }
+
         public ObjModelConfig BuildConfig()
         {
             PushRegion();
@@ -183,6 +199,8 @@ namespace Rendering
             if (useNs) result.Attributes.Add(ObjModelAttr.Ns);
 
             result.containTextures = useTextures;
+
+            result.containBump = useBumpFile;
 
             return result;
         }
@@ -339,6 +357,8 @@ namespace Rendering
 
                 model.mapKa = BufferLoad(material?.mapKa, textures);
                 model.mapKd = BufferLoad(material?.mapKd, textures);
+                model.mapKs = BufferLoad(material?.mapKs, textures);
+                model.mapBump = BufferLoad(material?.mapBump, textures);
 
                 var floats = new List<float>();
 

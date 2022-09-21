@@ -74,10 +74,12 @@ namespace Viewer
             {
                 { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder!)) },
                 { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder!)) },
+                { "bnormals", (Bnormals.ModelBuildConfig, () => new Bnormals(_builder!)) },
                 { "flat & lambert", (FlatLambert.ModelBuildConfig, () => new FlatLambert(_builder!)) },
                 { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
                 { "phong", (Phong.ModelBuildConfig, () => new Phong(_builder!)) },
                 { "textured", (Textured.ModelBuildConfig, () => new Textured(_builder!)) },
+                { "bump maps", (TBSMap.ModelBuildConfig, () => new TBSMap(_builder!)) },
             };
 
             _selectables = new Dictionary<string, Func<Positionable>>()

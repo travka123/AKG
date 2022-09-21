@@ -14,5 +14,7 @@ namespace AKG.ObjReader
         public T[] attributes;
         public Image<Rgba32>? mapKa;
         public Image<Rgba32>? mapKd;
+        public Image<Rgba32>? mapKs;
+        public Image<Rgba32>? mapBump;
     }
 }

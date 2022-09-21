@@ -1,0 +1,9 @@
+newmtl StingrayPBS1SG
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 25.0
+map_Ka Soldier_Low002_BackpackRetopo_blinn1SG_BaseColor.png
+map_Kd Soldier_Low002_BackpackRetopo_blinn1SG_BaseColor.png
+map_bump Soldier_Low002_BackpackRetopo_blinn1SG_Normal.png
+map_Ks Soldier_Low002_BackpackRetopo_blinn1SG_Roughness.png
