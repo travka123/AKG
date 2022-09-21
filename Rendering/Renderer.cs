@@ -26,7 +26,7 @@ namespace AKG.Rendering
             for (int i = 0; i < vo.Length; i++)
             {
                 var position = vo[i].position;
-                vo[i].position = position / position.W;
+                vo[i].position = new Vector4(position.X / position.W, position.Y / position.W, position.Z / position.W, position.W);
             }
 
             rasterizations[primitive].Rasterize(canvas, zBuffer, vo, _shader, uniforms, options);

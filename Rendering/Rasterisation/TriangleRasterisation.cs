@@ -59,10 +59,10 @@ namespace AKG.Rendering.Rasterisation
                     for (int i = 0; i < L; i++)
                     {
                         var ndc = new Vector4(a.position.X + xNDCStep * i, a.position.Y + yNDCStep * i, 0, 0);
-                        ndc.Z = Interpolate(a.position, b.position, a.position.Z, b.position.Z, ndc);
-                        ndc.W = Interpolate(a.position, b.position, a.position.W, b.position.W, ndc);
-                        
-                        float[] varying = Interpolate(a.position, b.position, a.varying, b.varying, ndc);
+
+                        ndc.Z = Interpolate(a.position, b.position, a.position.Z, b.position.Z, ndc, a.position.W, b.position.W);
+                        ndc.W = Interpolate(a.position, b.position, a.position.W, b.position.W, ndc, a.position.W, b.position.W);
+                        float[] varying = Interpolate(a.position, b.position, a.varying, b.varying, ndc, a.position.W, b.position.W);
 
                         int pixelX = (int)(aPixel.X + i * xPixelStep);
                         int pixelY = (int)(aPixel.Y + i * yPixelStep);
@@ -152,6 +152,46 @@ namespace AKG.Rendering.Rasterisation
             return result;
         }
 
+        private float Interpolate(Vector4 pos1, Vector4 pos2, float val1, float val2, Vector4 pos, float z1, float z2)
+        {
+            if (pos2.X - pos1.X == 0) return val1;
+            if ((z1 == 0) || (z2 == 0)) return Interpolate(pos1, pos2, val1, val2, pos);
+
+            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w2 = 1 - w1;
+
+            float d = w1 / z1 + w2 / z2;
+
+            return (w1 * val1 / z1 + w2 * val2 / z2) / d;
+        }
+
+        private float[] Interpolate(Vector4 pos1, Vector4 pos2, float[] val1, float[] val2, Vector4 pos, float z1, float z2)
+        {
+            if (pos2.X - pos1.X == 0) return val1;
+            if ((z1 == 0) || (z2 == 0)) return Interpolate(pos1, pos2, val1, val2, pos);
+
+            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w2 = 1 - w1;
+
+            float d = w1 / z1 + w2 / z2;
+
+            float[] result = new float[val1.Length];
+            for (int i = 0; i < val1.Length; i++)
+            {
+                result[i] = (w1 * val1[i] / z1 + w2 * val2[i] / z2) / d;
+            }
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (float.IsNaN(result[i]))
+                {
+                    Console.WriteLine("");
+                }
+            }
+
+            return result;
+        }
+
         private List<VertexShaderOutput[]> ClipTriangles(List<VertexShaderOutput[]> vo, int width, int height)
         {
             //rude
@@ -160,8 +200,7 @@ namespace AKG.Rendering.Rasterisation
             {
                 return vec.X >= -1 && vec.X <= 1 &&
                        vec.Y >= -1 && vec.Y <= 1 &&
-                       vec.Z >= -1 && vec.Z <= 1 &&
-                       vec.W >= -1 && vec.W <= 1;
+                       vec.Z >= -1 && vec.Z <= 1;
             };
 
             return vo.Where((vo) => vo.All((vo) => checkVec(vo.position))).ToList();
