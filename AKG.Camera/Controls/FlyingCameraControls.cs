@@ -49,13 +49,13 @@ namespace AKG.Camera.Controls
                 _yaw += _rotationSpeed * input.mouseOffset.X;
                 _pitch -= _rotationSpeed * input.mouseOffset.Y;
 
-                if (_pitch > (float)Math.PI /180 * 85)
+                if (_pitch > (float)Math.PI /180 * 84)
                 {
-                    _pitch = (float)Math.PI / 180 * 85;
+                    _pitch = (float)Math.PI / 180 * 84;
                 }
-                else if (_pitch < -(float)Math.PI / 180 * 85)
+                else if (_pitch < -(float)Math.PI / 180 * 84)
                 {
-                    _pitch = -(float)Math.PI / 180 * 85;
+                    _pitch = -(float)Math.PI / 180 * 84;
                 }
 
                 if (_yaw > (float)Math.PI)
@@ -75,12 +75,12 @@ namespace AKG.Camera.Controls
 
                 if (input.pressedKeys.Contains(87))
                 {
-                    move += direction;
+                    move += new Vector3(direction.X, 0, direction.Z);
                 }
 
                 if (input.pressedKeys.Contains(83))
                 {
-                    move -= direction;
+                    move -= new Vector3(direction.X, 0, direction.Z);
                 }
 
                 if (input.pressedKeys.Contains(65))
