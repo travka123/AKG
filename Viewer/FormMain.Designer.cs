@@ -32,6 +32,10 @@
             this.btnShow = new System.Windows.Forms.Button();
             this.cbModels = new System.Windows.Forms.ComboBox();
             this.cbSelectedMesh = new System.Windows.Forms.ComboBox();
+            this.cdMain = new System.Windows.Forms.ColorDialog();
+            this.btnAmbient = new System.Windows.Forms.Button();
+            this.btnDiffuse = new System.Windows.Forms.Button();
+            this.btnSpecular = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cbMeshes
@@ -56,7 +60,7 @@
             this.btnShow.Text = "SHOW";
             this.btnShow.UseVisualStyleBackColor = true;
             this.btnShow.Click += new System.EventHandler(this.button1_Click);
-            this.btnShow.KeyDown += new System.Windows.Forms.KeyEventHandler(this.btnShow_KeyDown);
+            this.btnShow.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
             // 
             // cbModels
             // 
@@ -82,11 +86,50 @@
             this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
             this.cbSelectedMesh.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbSelectedMesh_KeyDown);
             // 
+            // btnAmbient
+            // 
+            this.btnAmbient.Location = new System.Drawing.Point(589, 95);
+            this.btnAmbient.Name = "btnAmbient";
+            this.btnAmbient.Size = new System.Drawing.Size(75, 23);
+            this.btnAmbient.TabIndex = 0;
+            this.btnAmbient.TabStop = false;
+            this.btnAmbient.Text = "ambient";
+            this.btnAmbient.UseVisualStyleBackColor = true;
+            this.btnAmbient.Click += new System.EventHandler(this.btnAmbient_Click);
+            this.btnAmbient.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
+            // 
+            // btnDiffuse
+            // 
+            this.btnDiffuse.Location = new System.Drawing.Point(590, 124);
+            this.btnDiffuse.Name = "btnDiffuse";
+            this.btnDiffuse.Size = new System.Drawing.Size(75, 23);
+            this.btnDiffuse.TabIndex = 0;
+            this.btnDiffuse.TabStop = false;
+            this.btnDiffuse.Text = "diffuse";
+            this.btnDiffuse.UseVisualStyleBackColor = true;
+            this.btnDiffuse.Click += new System.EventHandler(this.btnDiffuse_Click);
+            this.btnDiffuse.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
+            // 
+            // btnSpecular
+            // 
+            this.btnSpecular.Location = new System.Drawing.Point(589, 153);
+            this.btnSpecular.Name = "btnSpecular";
+            this.btnSpecular.Size = new System.Drawing.Size(75, 23);
+            this.btnSpecular.TabIndex = 0;
+            this.btnSpecular.TabStop = false;
+            this.btnSpecular.Text = "specular";
+            this.btnSpecular.UseVisualStyleBackColor = true;
+            this.btnSpecular.Click += new System.EventHandler(this.btnSpecular_Click);
+            this.btnSpecular.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(676, 500);
+            this.Controls.Add(this.btnSpecular);
+            this.Controls.Add(this.btnDiffuse);
+            this.Controls.Add(this.btnAmbient);
             this.Controls.Add(this.cbSelectedMesh);
             this.Controls.Add(this.cbModels);
             this.Controls.Add(this.cbMeshes);
@@ -104,5 +147,9 @@
         private Button btnShow;
         private ComboBox cbModels;
         private ComboBox cbSelectedMesh;
+        private ColorDialog cdMain;
+        private Button btnAmbient;
+        private Button btnDiffuse;
+        private Button btnSpecular;
     }
 }

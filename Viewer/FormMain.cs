@@ -322,6 +322,9 @@ namespace Viewer
             cbMeshes.Hide();
             cbModels.Hide();
             cbSelectedMesh.Hide();
+            btnAmbient.Hide();
+            btnDiffuse.Hide();
+            btnSpecular.Hide();
         }
 
         private void ShowButtons()
@@ -331,6 +334,9 @@ namespace Viewer
             cbMeshes.Show();
             cbModels.Show();
             cbSelectedMesh.Show();
+            btnAmbient.Show();
+            btnDiffuse.Show();
+            btnSpecular.Show();
         }
 
         private void cbModels_SelectedIndexChanged(object sender, EventArgs e)
@@ -388,9 +394,53 @@ namespace Viewer
             e.SuppressKeyPress = true;
         }
 
-        private void btnShow_KeyDown(object sender, KeyEventArgs e)
+        private void emptyBtnKeyDown(object sender, KeyEventArgs e)
         {
             e.SuppressKeyPress = true;
+        }
+
+        private void btnAmbient_Click(object sender, EventArgs e)
+        {
+            _uniforms.ambientColor = GetColorFromUser(_uniforms.ambientColor);
+
+            lock (_inputLock)
+            {
+                _bmpOutdated = true;
+            }
+
+            HideButtons();
+        }
+
+        private void btnDiffuse_Click(object sender, EventArgs e)
+        {
+            _uniforms.lights[0].ColorDiffuse = GetColorFromUser(_uniforms.lights[0].ColorDiffuse);
+
+            lock (_inputLock)
+            {
+                _bmpOutdated = true;
+            }
+
+            HideButtons();
+        }
+
+        private void btnSpecular_Click(object sender, EventArgs e)
+        {
+            _uniforms.lights[0].ColorSpecular = GetColorFromUser(_uniforms.lights[0].ColorSpecular);
+
+            lock (_inputLock)
+            {
+                _bmpOutdated = true;
+            }
+
+            HideButtons();
+        }
+
+        private Vector3 GetColorFromUser(Vector3 initColor)
+        {
+            initColor *= 255;
+            cdMain.Color = Color.FromArgb(255, (int)initColor.X, (int)initColor.Y, (int)initColor.Z);
+            cdMain.ShowDialog();
+            return new Vector3((float)cdMain.Color.R / 255, (float)cdMain.Color.G / 255, (float)cdMain.Color.B / 255);
         }
     }
 }

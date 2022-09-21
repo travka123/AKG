@@ -26,8 +26,8 @@ namespace AKG.Viewer
 
         public Vector3 Position { get; set; }
         public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
-        public Vector3 ColorDiffuse { get; set; } 
-        public Vector3 ColorSpecular { get; set; } 
+        public Vector3 ColorDiffuse { get; set; }
+        public Vector3 ColorSpecular { get; set; }
 
         public LightBox(Vector3 position, Vector3 color)
         {
@@ -55,12 +55,47 @@ namespace AKG.Viewer
 
         private VertexShaderOutput VertexShader(VertexShaderInput<Vector4, Uniforms> vi)
         {
-            var position = Vector4.Transform(vi.attribute, vi.uniforms.MVP);
-            return new(position, Array.Empty<float>());
+            var positionM = Vector4.Transform(vi.attribute, vi.uniforms.MVP);
+
+            var varying = new float[4];
+            vi.attribute.CopyTo(varying);
+
+            return new(positionM, varying);
         }
 
         private FragmentShaderOutput FragmentShader(FragmentShaderInput<Uniforms> fi)
         {
+            var position = new Vector3(new ReadOnlySpan<float>(fi.varying, 0, 3));
+
+            bool isBorder = false;
+            float border = 0.4f;
+
+            if (!(Math.Abs(position.X) > 0.49))
+            {
+                if (!(Math.Abs(position.Y) > 0.49))
+                {
+                    isBorder = (Math.Abs(position.X) > border) || (Math.Abs(position.Y) > border);
+                }
+                else
+                {
+                    isBorder = (Math.Abs(position.X) > border) || (Math.Abs(position.Z) > border);
+                }
+            }
+            else
+            {
+                isBorder = (Math.Abs(position.Y) > border) || (Math.Abs(position.Z) > border);
+            }
+
+            if (isBorder)
+            {
+                return new(new Vector4(fi.uniforms.ambientColor.X, fi.uniforms.ambientColor.Y, fi.uniforms.ambientColor.Z, 1.0f));
+            }
+
+            if (position.Length() < 0.55)
+            {
+                return new(new Vector4(ColorSpecular.X, ColorSpecular.Y, ColorSpecular.Z, 1.0f));
+            }
+
             return new(new Vector4(ColorDiffuse.X, ColorDiffuse.Y, ColorDiffuse.Z, 1.0f));
         }
 

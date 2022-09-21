@@ -149,7 +149,7 @@ namespace AKG.Viewer.Meshes
                 {
                     var rgba32 = textureKd[(int)((textureKd.Width - 1) * texCords.X), (int)((textureKd.Height - 1) * (1 - texCords.Y))].ToScaledVector4();
 
-                    diffuse = Vector3.Multiply(ambient, new Vector3(rgba32.X, rgba32.Y, rgba32.Z));
+                    diffuse = Vector3.Multiply(diffuse, new Vector3(rgba32.X, rgba32.Y, rgba32.Z));
                 }
 
                 var ks = new Vector3(new ReadOnlySpan<float>(fi.varying, KS_OFFSET, 3));
