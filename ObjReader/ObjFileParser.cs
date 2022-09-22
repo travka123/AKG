@@ -22,6 +22,7 @@ namespace Rendering
                 { "s", (s) => { } },
                 { "o", (s) => { } },
                 { "mtllib", (s) => Parse(builder.Path + "\\" + s, builder) },
+                { "l", (s) => { } },
 
                 { "newmtl", (s) => builder.NewMaterial(s) },
                 { "Ka", (s) => builder.SetKa(ParseVector3(s)) },
@@ -40,6 +41,7 @@ namespace Rendering
                 { "refl", (s) => { } },
                 { "Tf", (s) => { } },
                 { "Tr", (s) => { } },
+                { "map_d", (s) => { } },
             };
 
             var reader = new StreamReader(ms);

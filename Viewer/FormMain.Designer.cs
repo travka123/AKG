@@ -126,7 +126,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(676, 500);
+            this.ClientSize = new System.Drawing.Size(680, 564);
             this.Controls.Add(this.btnSpecular);
             this.Controls.Add(this.btnDiffuse);
             this.Controls.Add(this.btnAmbient);
