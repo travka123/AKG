@@ -60,9 +60,9 @@ namespace AKG.Rendering.Rasterisation
                     {
                         var ndc = new Vector4(a.position.X + xNDCStep * i, a.position.Y + yNDCStep * i, 0, 0);
 
-                        ndc.Z = Interpolate(a.position, b.position, a.position.Z, b.position.Z, ndc, a.position.W, b.position.W);
-                        ndc.W = Interpolate(a.position, b.position, a.position.W, b.position.W, ndc, a.position.W, b.position.W);
-                        float[] varying = Interpolate(a.position, b.position, a.varying, b.varying, ndc, a.position.W, b.position.W);
+                        ndc.Z = Interpolate(0, L, a.position.Z, b.position.Z, i, a.position.W, b.position.W);
+                        ndc.W = Interpolate(0, L, a.position.W, b.position.W, i, a.position.W, b.position.W);
+                        float[] varying = Interpolate(0, L, a.varying, b.varying, i, a.position.W, b.position.W);
 
                         int pixelX = (int)(aPixel.X + i * xPixelStep);
                         int pixelY = (int)(aPixel.Y + i * yPixelStep);
@@ -126,21 +126,17 @@ namespace AKG.Rendering.Rasterisation
             });
         }
 
-        private float Interpolate(Vector4 pos1, Vector4 pos2, float val1, float val2, Vector4 pos)
+        private float Interpolate(float start, float end, float val1, float val2, float position)
         {
-            if (pos2.X - pos1.X == 0) return val1;
-
-            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
             return w1 * val1 + w2 * val2;
         }
 
-        private float[] Interpolate(Vector4 pos1, Vector4 pos2, float[] val1, float[] val2, Vector4 pos)
+        private float[] Interpolate(float start, float end, float[] val1, float[] val2, float position)
         {
-            if (pos2.X - pos1.X == 0) return val1;
-
-            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
             float[] result = new float[val1.Length];
@@ -152,12 +148,11 @@ namespace AKG.Rendering.Rasterisation
             return result;
         }
 
-        private float Interpolate(Vector4 pos1, Vector4 pos2, float val1, float val2, Vector4 pos, float z1, float z2)
+        private float Interpolate(float start, float end, float val1, float val2, float position, float z1, float z2)
         {
-            if (pos2.X - pos1.X == 0) return val1;
-            if ((z1 == 0) || (z2 == 0)) return Interpolate(pos1, pos2, val1, val2, pos);
+            if ((z1 == 0) || (z2 == 0)) return Interpolate(start, end, val1, val2, position);
 
-            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
             float d = w1 / z1 + w2 / z2;
@@ -165,12 +160,11 @@ namespace AKG.Rendering.Rasterisation
             return (w1 * val1 / z1 + w2 * val2 / z2) / d;
         }
 
-        private float[] Interpolate(Vector4 pos1, Vector4 pos2, float[] val1, float[] val2, Vector4 pos, float z1, float z2)
+        private float[] Interpolate(float start, float end, float[] val1, float[] val2, float position, float z1, float z2)
         {
-            if (pos2.X - pos1.X == 0) return val1;
-            if ((z1 == 0) || (z2 == 0)) return Interpolate(pos1, pos2, val1, val2, pos);
+            if ((z1 == 0) || (z2 == 0)) return Interpolate(start, end, val1, val2, position);
 
-            float w1 = (pos2.X - pos.X) / (pos2.X - pos1.X);
+            float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
             float d = w1 / z1 + w2 / z2;
