@@ -25,8 +25,6 @@ namespace AKG.Viewer.Meshes
 
         public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout);
 
-        public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
-
         private struct Attributes
         {
             public Vector4 position;
@@ -44,7 +42,7 @@ namespace AKG.Viewer.Meshes
         const int KS_OFFSET = 13;
         const int NS_OFFSET = 16;
 
-        private Attributes[] _vertices;
+        private Attributes[,] _vertices;
 
         private Renderer<Attributes, Uniforms> _renderer;
 
@@ -137,7 +135,12 @@ namespace AKG.Viewer.Meshes
 
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
         {
-            _renderer.Draw(colors, zBuffer, Primitive, _vertices, uniforms, options);
+            _renderer.Draw(colors, zBuffer, _vertices, uniforms, options);
+        }
+
+        public int GetVerticesNumber()
+        {
+            return _vertices.Length;
         }
     }
 }

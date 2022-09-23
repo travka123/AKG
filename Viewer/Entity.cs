@@ -40,5 +40,10 @@ namespace AKG.Viewer
         {
             Position = position;
         }
+
+        public int GetVerticesNumber()
+        {
+            return _mesh is not null ? _mesh.GetVerticesNumber() : 0;
+        }
     }
 }

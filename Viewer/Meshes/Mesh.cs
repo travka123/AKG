@@ -7,5 +7,6 @@ namespace AKG.Viewer.Meshes
     public interface Mesh
     {
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options);
+        public int GetVerticesNumber();
     }
 }

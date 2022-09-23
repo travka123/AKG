@@ -207,7 +207,7 @@ namespace Rendering
 
         private delegate void PipelineMethod(List<float> floats, (int v, int tv, int nv) faces, Material material);
 
-        public T[] BuildFlatByConfig<T>(ObjModelBuildConfig conf)
+        public T[,] BuildFlatByConfig<T>(ObjModelBuildConfig conf)
         {
             PushRegion();
 
@@ -321,7 +321,7 @@ namespace Rendering
             floats.Add(material.Ns);
         }
 
-        private T[] RunFlatPipe<T>(List<float> floats, PipelineMethod pipeline)
+        private T[,] RunFlatPipe<T>(List<float> floats, PipelineMethod pipeline)
         {
             foreach (var objFaces in regions)
             {
@@ -338,7 +338,7 @@ namespace Rendering
                 }
             }
 
-            return Cast<T>(floats.ToArray());
+            return TriangleArray(Cast<T>(floats.ToArray()));
         }
 
         private ObjModel<T>[] RunPipe<T>(PipelineMethod pipeline)
@@ -372,7 +372,7 @@ namespace Rendering
                     }
                 }
 
-                model.attributes = Cast<T>(floats.ToArray());
+                model.attributes = TriangleArray(Cast<T>(floats.ToArray()));
 
                 models.Add(model);
             }
@@ -411,6 +411,22 @@ namespace Rendering
             }
 
             return image;
+        }
+
+        private T[,] TriangleArray<T>(T[] array)
+        {
+            var tArr = new T[array.Length / 3, 3];
+
+            int len = tArr.GetLength(0);
+
+            for (int i = 0, j = 0; i < len; i++, j += 3)
+            {
+                tArr[i, 0] = array[j];
+                tArr[i, 1] = array[j + 1];
+                tArr[i, 2] = array[j + 2];            
+            }
+
+            return tArr;
         }
     }
 }

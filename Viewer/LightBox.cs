@@ -20,9 +20,7 @@ namespace AKG.Viewer
 
         private Renderer<Vector4, Uniforms> _renderer;
 
-        private Vector4[] _vertices;
-
-        public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
+        private Vector4[,] _vertices;
 
         public Vector3 Position { get; set; }
         public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
@@ -49,8 +47,7 @@ namespace AKG.Viewer
 
         public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
         {
-            _renderer.Draw(colors, zBuffer, Primitive, _vertices,
-                new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
+            _renderer.Draw(colors, zBuffer, _vertices, new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
         }
 
         private VertexShaderOutput VertexShader(VertexShaderInput<Vector4, Uniforms> vi)
@@ -107,6 +104,11 @@ namespace AKG.Viewer
         public void SetDirection(Vector3 direction)
         {
             Direction = direction;
+        }
+
+        public int GetVerticesNumber()
+        {
+            return _vertices.Length;
         }
     }
 }

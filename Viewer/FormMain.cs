@@ -8,6 +8,7 @@ using AKG.Viewer;
 using AKG.Viewer.Meshes;
 using Microsoft.VisualBasic.Devices;
 using Rendering;
+using System;
 using System.Collections;
 using System.Configuration;
 using System.Drawing.Imaging;
@@ -41,9 +42,19 @@ namespace Viewer
 
         private RenderingOptions _renderingOptions;
 
+        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
+
+        Vector4[,] colorsBuffer;
+
+        float[,] zBuffer;
+
         public FormMain()
         {
             InitializeComponent();
+
+            colorsBuffer = new Vector4[Height, Width];
+
+            zBuffer = new float[Height, Width];
 
             _bmp = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppPArgb);
 
@@ -91,81 +102,128 @@ namespace Viewer
 
             cbModels.DataSource = files.Select(f => f.Substring(PATH.Length)).ToList();
             cbSelectedMesh.DataSource = _selectables.Keys.ToList();
-        }
-
-        private volatile bool _bmpOutdated = true;
-
-        private readonly object _inputLock = new object();
+        }    
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-
             Task.Run(() =>
             {
-                Vector4[,] v4Colors = new Vector4[Height, Width];
-                float[,] zBuffer = new float[Height, Width];
-
-                List<int> wasPressed = new List<int>();
-
-                while (_entity is null) { Thread.Sleep(0); }
-
                 while (true)
                 {
-                    if (_bmpOutdated)
-                    {
-                        _bmpOutdated = false;
+                    ProcessInput();
 
-                        Clear(v4Colors);
-                        ClearZ(zBuffer);
-
-                        _entity.Draw(v4Colors, zBuffer, _uniforms, _renderingOptions);
-
-                        foreach (var light in _uniforms.lights)
-                        {
-                            light.Draw(v4Colors, zBuffer, _uniforms, _renderingOptions);
-                        }
-
-                        var colors = GetBMPColors(v4Colors);
-
-                        lock (_bmp)
-                        {
-                            var bitmapInfo = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, _bmp.PixelFormat);
-
-                            Marshal.Copy(colors, 0, bitmapInfo.Scan0, colors.Length);
-
-                            _bmp.UnlockBits(bitmapInfo);
-                        }
-
-                        Invalidate();
-                    }
-
-                    lock (_inputLock)
-                    {
-                        var now = DateTime.Now;
-
-                        var keysDown = _input.pressedKeys.Where(i => !wasPressed.Contains(i)).ToList();
-
-                        wasPressed.Clear();
-                        wasPressed.AddRange(_input.pressedKeys);
-
-                        _input.msDelta = (now - _input.time).Milliseconds;
-                        _input.time = now;
-                        _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
-
-                        _bmpOutdated |= _controls.Process(_input);
-
-                        _input.mouseOffset = Vector2.Zero;
-                        _input.mousePrevPosition = _input.mouseCurPosition;
-
-                        if (keysDown.Contains(120))
-                        {
-                            _renderingOptions.FillTriangles = !_renderingOptions.FillTriangles;
-                            _bmpOutdated = true;
-                        }
-                    }
+                    Render();
                 }
             });
+        }
+
+        private readonly object _inputLock = new object();
+        private volatile bool _bmpOutdated = true;
+        private HashSet<int> _prevPressed = new HashSet<int>();
+
+        private void ProcessInput()
+        {
+            lock (_inputLock)
+            {
+                var now = DateTime.Now;
+
+                _input.msDelta = (now - _input.time).Milliseconds;
+                _input.time = DateTime.Now;
+                _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
+
+                _bmpOutdated |= _controls.Process(_input);
+
+                _input.mouseOffset = Vector2.Zero;
+                _input.mousePrevPosition = _input.mouseCurPosition;
+
+                var nKeysDown = _input.pressedKeys.Where(i => !_prevPressed.Contains(i)).ToHashSet();
+
+                if (nKeysDown.Contains(120))
+                {
+                    _renderingOptions.FillTriangles = !_renderingOptions.FillTriangles;
+                    _bmpOutdated = true;
+                }
+
+                _prevPressed.Clear();
+                _prevPressed.UnionWith(_input.pressedKeys);
+            }
+        }
+
+        private bool painted = true;
+
+        private void Render()
+        {
+            if (_bmpOutdated)
+            {
+                Clear(colorsBuffer, _clearColor);
+                Clear(zBuffer, float.MaxValue);
+
+                _entity.Draw(colorsBuffer, zBuffer, _uniforms, _renderingOptions);
+
+                foreach (var light in _uniforms.lights)
+                {
+                    light.Draw(colorsBuffer, zBuffer, _uniforms, _renderingOptions);
+                }
+
+                var colors = GetBMPColors(colorsBuffer);
+
+                lock (_bmp)
+                {
+                    while(!painted)
+                        Monitor.Wait(_bmp);
+
+                    var bitmapInfo = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, _bmp.PixelFormat);
+
+                    Marshal.Copy(colors, 0, bitmapInfo.Scan0, colors.Length);
+
+                    _bmp.UnlockBits(bitmapInfo);
+
+                    painted = false;
+
+                    Invalidate();
+                }
+
+                _bmpOutdated = false;
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            ProcessFPS();
+
+            lock (_bmp)
+            {
+                if (_stretch)
+                {
+                    e.Graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
+                }
+                else
+                {
+                    e.Graphics.DrawImage(_bmp, 0, 0);
+                }
+
+                painted = true;
+                Monitor.Pulse(_bmp);
+            }
+        }
+
+        private DateTime fpsLastPrintTime = DateTime.Now;
+        private int fpsCounter = 0;
+
+        private void ProcessFPS()
+        {
+            fpsCounter++;
+
+            var curTime = DateTime.Now;
+
+            var sDiff = (curTime - fpsLastPrintTime).TotalSeconds;
+
+            if (sDiff > 1.0)
+            {
+                lFPS.Text = $"FPS: {fpsCounter}";
+                fpsLastPrintTime = curTime;
+                fpsCounter = 0;
+            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -226,21 +284,6 @@ namespace Viewer
 
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            lock (_bmp)
-            {
-                if (_stretch)
-                {
-                    e.Graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
-                }
-                else
-                {
-                    e.Graphics.DrawImage(_bmp, 0, 0);
-                }
-            }
-        }
-
         private byte[] GetBMPColors(Vector4[,] colors)
         {
             int height = colors.GetLength(0);
@@ -268,32 +311,30 @@ namespace Viewer
             return bytes;
         }
 
-        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
-
-        private void Clear(Vector4[,] colors)
+        private void Clear(Vector4[,] buffer, Vector4 value)
         {
-            int height = colors.GetLength(0);
-            int width = colors.GetLength(1);
+            int height = buffer.GetLength(0);
+            int width = buffer.GetLength(1);
 
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    colors[i, j] = _clearColor;
+                    buffer[i, j] = _clearColor;
                 }
             }
         }
 
-        private void ClearZ(float[,] colors)
+        private void Clear(float[,] buffer, float value)
         {
-            int height = colors.GetLength(0);
-            int width = colors.GetLength(1);
+            int height = buffer.GetLength(0);
+            int width = buffer.GetLength(1);
 
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    colors[i, j] = float.MaxValue;
+                    buffer[i, j] = value;
                 }
             }
         }
@@ -304,12 +345,19 @@ namespace Viewer
 
             _entity.SetMesh(_meshes[meshStr].create());
 
+            ShowVerticesCount();
+
             lock (_inputLock)
             {
                 _bmpOutdated = true;
             }
 
             HideButtons();
+        }
+
+        private void ShowVerticesCount()
+        {
+            lVertices.Text = $"Vertices: {_entity.GetVerticesNumber()}";
         }
 
         private void button1_Click(object sender, EventArgs e)

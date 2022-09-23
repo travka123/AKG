@@ -26,8 +26,6 @@ namespace AKG.Viewer.Meshes
 
         public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout, true, true);
 
-        public static readonly Primitives Primitive = Primitives.TRIANGLE_LINES;
-
         private struct Attributes
         {
             public Vector4 position;
@@ -203,9 +201,14 @@ namespace AKG.Viewer.Meshes
         {
             foreach (var model in _models)
             {
-                _renderer.Draw(colors, zBuffer, Primitive, model.attributes, new Uniforms(uniforms.MVP, uniforms.M,
+                _renderer.Draw(colors, zBuffer, model.attributes, new Uniforms(uniforms.MVP, uniforms.M,
                     uniforms.ambientColor, uniforms.lights, model, uniforms.camera), options);
             }
+        }
+
+        public int GetVerticesNumber()
+        {
+            return _models.Sum(m => m.attributes.Length);
         }
     }
 }

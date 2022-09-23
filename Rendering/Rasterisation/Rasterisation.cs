@@ -10,7 +10,7 @@ namespace AKG.Rendering.Rasterisation
 {
     public abstract class Rasterisation<A, U>
     {
-        public abstract void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options);
+        public abstract void Rasterize(Vector4[,] canvas, float[,] zBuffer, List<VertexShaderOutput[]> voTriangles, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options);
 
         protected void SetColor(Vector4[,] canvas, float[,] zBuffer, Vector4 color, Vector2 pixel, float z, object drawLocker)
         {

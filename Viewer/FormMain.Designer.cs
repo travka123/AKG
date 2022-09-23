@@ -36,6 +36,8 @@
             this.btnAmbient = new System.Windows.Forms.Button();
             this.btnDiffuse = new System.Windows.Forms.Button();
             this.btnSpecular = new System.Windows.Forms.Button();
+            this.lFPS = new System.Windows.Forms.Label();
+            this.lVertices = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cbMeshes
@@ -122,11 +124,33 @@
             this.btnSpecular.Click += new System.EventHandler(this.btnSpecular_Click);
             this.btnSpecular.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
             // 
+            // lFPS
+            // 
+            this.lFPS.AutoSize = true;
+            this.lFPS.BackColor = System.Drawing.Color.Transparent;
+            this.lFPS.Location = new System.Drawing.Point(12, 540);
+            this.lFPS.Name = "lFPS";
+            this.lFPS.Size = new System.Drawing.Size(26, 15);
+            this.lFPS.TabIndex = 1;
+            this.lFPS.Text = "FPS";
+            // 
+            // lVertices
+            // 
+            this.lVertices.AutoSize = true;
+            this.lVertices.BackColor = System.Drawing.Color.Transparent;
+            this.lVertices.Location = new System.Drawing.Point(12, 525);
+            this.lVertices.Name = "lVertices";
+            this.lVertices.Size = new System.Drawing.Size(47, 15);
+            this.lVertices.TabIndex = 2;
+            this.lVertices.Text = "Vertices";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(680, 564);
+            this.Controls.Add(this.lVertices);
+            this.Controls.Add(this.lFPS);
             this.Controls.Add(this.btnSpecular);
             this.Controls.Add(this.btnDiffuse);
             this.Controls.Add(this.btnAmbient);
@@ -139,6 +163,7 @@
             this.Text = "Hello world";
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.FormMain_PreviewKeyDown);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -151,5 +176,7 @@
         private Button btnAmbient;
         private Button btnDiffuse;
         private Button btnSpecular;
+        private Label lFPS;
+        private Label lVertices;
     }
 }

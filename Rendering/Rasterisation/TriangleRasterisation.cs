@@ -11,22 +11,10 @@ namespace AKG.Rendering.Rasterisation
 {
     public class TriangleRasterisation<A, U> : Rasterisation<A, U>
     {
-        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, VertexShaderOutput[] vo, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
+        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, List<VertexShaderOutput[]> voTriangles, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
         {
             int canvasH = canvas.GetLength(0);
             int canvasW = canvas.GetLength(1);
-
-            List<VertexShaderOutput[]> voTriangles = new();
-
-            int tLen = vo.Length - vo.Length % 3;
-            for (int i = 0; i < tLen; i += 3)
-            {
-                var triangle = new VertexShaderOutput[3];
-                triangle[0] = vo[i + 0];
-                triangle[1] = vo[i + 1];
-                triangle[2] = vo[i + 2];
-                voTriangles.Add(triangle);
-            }
 
             voTriangles = ClipTriangles(voTriangles, canvasW, canvasH);
             voTriangles = CullingTriangles(voTriangles);
@@ -38,7 +26,7 @@ namespace AKG.Rendering.Rasterisation
 
             voTriangles.AsParallel().ForAll((t) =>
             {
-                var drawLine = (VertexShaderOutput a, VertexShaderOutput b, Action<int, int, Vector4, float[]> callback) =>
+                var drawLine = (VertexShaderOutput a, VertexShaderOutput b, Action<int, int, VertexShaderOutput> callback) =>
                 {
                     var aPixel = ScreenCoordinates.PixelFromNDC(a.position, canvasW, canvasH);
                     var bPixel = ScreenCoordinates.PixelFromNDC(b.position, canvasW, canvasH);
@@ -58,26 +46,28 @@ namespace AKG.Rendering.Rasterisation
 
                     for (int i = 0; i < L; i++)
                     {
-                        var ndc = new Vector4(a.position.X + xNDCStep * i, a.position.Y + yNDCStep * i, 0, 0);
+                        var ndc = new Vector4(
+                            a.position.X + xNDCStep * i, 
+                            a.position.Y + yNDCStep * i, 
+                            Interpolate(0, L, a.position.Z, b.position.Z, i, a.W, b.W), 
+                            1);
 
-                        ndc.Z = Interpolate(0, L, a.position.Z, b.position.Z, i, a.position.W, b.position.W);
-                        ndc.W = Interpolate(0, L, a.position.W, b.position.W, i, a.position.W, b.position.W);
-                        float[] varying = Interpolate(0, L, a.varying, b.varying, i, a.position.W, b.position.W);
+                        float[] varying = Interpolate(0, L, a.varying, b.varying, i, a.W, b.W);
 
                         int pixelX = (int)(aPixel.X + i * xPixelStep);
                         int pixelY = (int)(aPixel.Y + i * yPixelStep);
 
-                        callback(pixelX, pixelY, ndc, varying);
+                        callback(pixelX, pixelY, new(ndc, varying, Interpolate(0, L, a.W, b.W, i, a.W, b.W)));
                     }
                 };
 
-                var drawCallback = (int pixelX, int pixelY, Vector4 ndc, float[] varying) =>
+                var drawCallback = (int pixelX, int pixelY, VertexShaderOutput vo) =>
                 {
-                    var fo = shader.fragmentShader(new(varying, uniforms, new Vector2(pixelX, pixelY)));
+                    var fo = shader.fragmentShader(new(vo.varying, uniforms, new Vector2(pixelX, pixelY)));
 
                     if (fo.color is not null)
                     {
-                        SetColor(canvas, zBuffer, fo.color.Value, pixelX, pixelY, ndc.Z, drawLocker);
+                        SetColor(canvas, zBuffer, fo.color.Value, pixelX, pixelY, vo.position.Z, drawLocker);
                     }
                 };
 
@@ -85,7 +75,7 @@ namespace AKG.Rendering.Rasterisation
                 {
                     var boarders = new SortedDictionary<int, SortedDictionary<int, VertexShaderOutput>>();
 
-                    var collectCallback = (int pixelX, int pixelY, Vector4 ndc, float[] varying) =>
+                    var collectCallback = (int pixelX, int pixelY, VertexShaderOutput vo) =>
                     {
                         var xDict = boarders.GetValueOrDefault(pixelY);
                         if (xDict is null)
@@ -93,7 +83,7 @@ namespace AKG.Rendering.Rasterisation
                             xDict = new();
                             boarders[pixelY] = xDict;
                         }
-                        xDict[pixelX] = new(ndc, varying);
+                        xDict[pixelX] = vo;
                     };
 
                     drawLine(t[0], t[1], collectCallback);
@@ -112,7 +102,7 @@ namespace AKG.Rendering.Rasterisation
                             }
                             else if (list[i].Key - list[i - 1].Key == 1)
                             {
-                                drawCallback(list[i - 1].Key, pixelY, list[i - 1].Value.position, list[i - 1].Value.varying);
+                                drawCallback(list[i - 1].Key, pixelY, list[i - 1].Value);
                             }
                         }
                     }
@@ -173,14 +163,6 @@ namespace AKG.Rendering.Rasterisation
             for (int i = 0; i < val1.Length; i++)
             {
                 result[i] = (w1 * val1[i] / z1 + w2 * val2[i] / z2) / d;
-            }
-
-            for (int i = 0; i < result.Length; i++)
-            {
-                if (float.IsNaN(result[i]))
-                {
-                    Console.WriteLine("");
-                }
             }
 
             return result;
