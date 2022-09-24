@@ -36,7 +36,6 @@
             this.btnAmbient = new System.Windows.Forms.Button();
             this.btnDiffuse = new System.Windows.Forms.Button();
             this.btnSpecular = new System.Windows.Forms.Button();
-            this.lFPS = new System.Windows.Forms.Label();
             this.lVertices = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -44,9 +43,9 @@
             // 
             this.cbMeshes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbMeshes.FormattingEnabled = true;
-            this.cbMeshes.Location = new System.Drawing.Point(543, 39);
+            this.cbMeshes.Location = new System.Drawing.Point(522, 39);
             this.cbMeshes.Name = "cbMeshes";
-            this.cbMeshes.Size = new System.Drawing.Size(123, 23);
+            this.cbMeshes.Size = new System.Drawing.Size(144, 23);
             this.cbMeshes.TabIndex = 0;
             this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
@@ -68,9 +67,9 @@
             // 
             this.cbModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbModels.FormattingEnabled = true;
-            this.cbModels.Location = new System.Drawing.Point(543, 12);
+            this.cbModels.Location = new System.Drawing.Point(522, 12);
             this.cbModels.Name = "cbModels";
-            this.cbModels.Size = new System.Drawing.Size(123, 23);
+            this.cbModels.Size = new System.Drawing.Size(144, 23);
             this.cbModels.TabIndex = 0;
             this.cbModels.TabStop = false;
             this.cbModels.SelectedIndexChanged += new System.EventHandler(this.cbModels_SelectedIndexChanged);
@@ -80,9 +79,9 @@
             // 
             this.cbSelectedMesh.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSelectedMesh.FormattingEnabled = true;
-            this.cbSelectedMesh.Location = new System.Drawing.Point(543, 66);
+            this.cbSelectedMesh.Location = new System.Drawing.Point(522, 66);
             this.cbSelectedMesh.Name = "cbSelectedMesh";
-            this.cbSelectedMesh.Size = new System.Drawing.Size(123, 23);
+            this.cbSelectedMesh.Size = new System.Drawing.Size(144, 23);
             this.cbSelectedMesh.TabIndex = 0;
             this.cbSelectedMesh.TabStop = false;
             this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
@@ -124,21 +123,11 @@
             this.btnSpecular.Click += new System.EventHandler(this.btnSpecular_Click);
             this.btnSpecular.KeyDown += new System.Windows.Forms.KeyEventHandler(this.emptyBtnKeyDown);
             // 
-            // lFPS
-            // 
-            this.lFPS.AutoSize = true;
-            this.lFPS.BackColor = System.Drawing.Color.Transparent;
-            this.lFPS.Location = new System.Drawing.Point(12, 540);
-            this.lFPS.Name = "lFPS";
-            this.lFPS.Size = new System.Drawing.Size(26, 15);
-            this.lFPS.TabIndex = 1;
-            this.lFPS.Text = "FPS";
-            // 
             // lVertices
             // 
             this.lVertices.AutoSize = true;
-            this.lVertices.BackColor = System.Drawing.Color.Transparent;
-            this.lVertices.Location = new System.Drawing.Point(12, 525);
+            this.lVertices.BackColor = System.Drawing.Color.MistyRose;
+            this.lVertices.Location = new System.Drawing.Point(12, 540);
             this.lVertices.Name = "lVertices";
             this.lVertices.Size = new System.Drawing.Size(47, 15);
             this.lVertices.TabIndex = 2;
@@ -150,7 +139,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(680, 564);
             this.Controls.Add(this.lVertices);
-            this.Controls.Add(this.lFPS);
             this.Controls.Add(this.btnSpecular);
             this.Controls.Add(this.btnDiffuse);
             this.Controls.Add(this.btnAmbient);
@@ -176,7 +164,6 @@
         private Button btnAmbient;
         private Button btnDiffuse;
         private Button btnSpecular;
-        private Label lFPS;
         private Label lVertices;
     }
 }

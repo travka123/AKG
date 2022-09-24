@@ -73,9 +73,9 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
+        public void Draw(Canvas canvas, Uniforms uniforms, RenderingOptions options)
         {
-            _renderer.Draw(colors, zBuffer, _vertices, uniforms, options);
+            _renderer.Draw(canvas, _vertices, uniforms, options);
         }
 
         public int GetVerticesNumber()

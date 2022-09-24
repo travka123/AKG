@@ -17,7 +17,7 @@ namespace AKG.Rendering
             _shader = shaderProgram;
         }
 
-        public void Draw(Vector4[,] canvas, float[,] zBuffer, A[,] attributes, U uniforms, RenderingOptions options)
+        public void Draw(Canvas canvas, A[,] attributes, U uniforms, RenderingOptions options)
         {
             var voTriangles = new VertexShaderOutput[attributes.GetLength(0)][];
 
@@ -41,7 +41,7 @@ namespace AKG.Rendering
                 voTrianglesList.Add(voTriangles[i]);
             }
 
-            triangleRasterisationAlg.Rasterize(canvas, zBuffer, voTrianglesList, _shader, uniforms, options);
+            triangleRasterisationAlg.Rasterize(canvas, voTrianglesList, _shader, uniforms, options);
         }
 
         private VertexShaderOutput WDiv(VertexShaderOutput vo)

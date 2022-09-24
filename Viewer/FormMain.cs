@@ -24,19 +24,17 @@ namespace Viewer
 
         private bool _stretch = false;
 
-        Bitmap _bmp;
+        private Bitmap _bmp;
+
+        private byte[] _bmpColors;
 
         private Input _input;
 
         private Uniforms _uniforms;
 
-        private CameraControl _controls;
-
         private Entity _entity;
 
         private Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)> _meshes;
-
-        private ObjModelBuilder _builder;
 
         private Dictionary<string, Func<Positionable>> _selectables;
 
@@ -44,19 +42,25 @@ namespace Viewer
 
         private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
 
-        Vector4[,] colorsBuffer;
+        Canvas _canvas;
 
-        float[,] zBuffer;
+        private Vector4[] _shadowColorBuffer;
+
+        private ObjModelBuilder _builder = null!;
+
+        private CameraControl _controls = null!;
 
         public FormMain()
         {
             InitializeComponent();
 
-            colorsBuffer = new Vector4[Height, Width];
+            _canvas = new Canvas(Height, Width);
 
-            zBuffer = new float[Height, Width];
+            _shadowColorBuffer = new Vector4[Height * Width];
 
             _bmp = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppPArgb);
+
+            _bmpColors = new byte[Height * Width * 4];
 
             _input = new();
 
@@ -83,14 +87,14 @@ namespace Viewer
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
-                { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder!)) },
-                { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder!)) },
-                { "bnormals", (Bnormals.ModelBuildConfig, () => new Bnormals(_builder!)) },
-                { "flat & lambert", (FlatLambert.ModelBuildConfig, () => new FlatLambert(_builder!)) },
-                { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder!)) },
-                { "phong", (Phong.ModelBuildConfig, () => new Phong(_builder!)) },
-                { "textured", (Textured.ModelBuildConfig, () => new Textured(_builder!)) },
-                { "bump maps", (TBSMap.ModelBuildConfig, () => new TBSMap(_builder!)) },
+                { "solid color", (SolidColor.ModelBuildConfig, () => new SolidColor(_builder)) },
+                { "normals", (Normals.ModelBuildConfig, () => new Normals(_builder)) },
+                { "bnormals", (Bnormals.ModelBuildConfig, () => new Bnormals(_builder)) },
+                { "flat & lambert", (FlatLambert.ModelBuildConfig, () => new FlatLambert(_builder)) },
+                { "lambert", (Lambert.ModelBuildConfig, () => new Lambert(_builder)) },
+                { "phong", (Phong.ModelBuildConfig, () => new Phong(_builder)) },
+                { "textured", (Textured.ModelBuildConfig, () => new Textured(_builder)) },
+                { "bump maps", (TBSMap.ModelBuildConfig, () => new TBSMap(_builder)) },
             };
 
             _selectables = new Dictionary<string, Func<Positionable>>()
@@ -102,7 +106,7 @@ namespace Viewer
 
             cbModels.DataSource = files.Select(f => f.Substring(PATH.Length)).ToList();
             cbSelectedMesh.DataSource = _selectables.Keys.ToList();
-        }    
+        }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -118,7 +122,6 @@ namespace Viewer
         }
 
         private readonly object _inputLock = new object();
-        private volatile bool _bmpOutdated = true;
         private HashSet<int> _prevPressed = new HashSet<int>();
 
         private void ProcessInput()
@@ -131,7 +134,7 @@ namespace Viewer
                 _input.time = DateTime.Now;
                 _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
 
-                _bmpOutdated |= _controls.Process(_input);
+                _controls.Process(_input);
 
                 _input.mouseOffset = Vector2.Zero;
                 _input.mousePrevPosition = _input.mouseCurPosition;
@@ -141,7 +144,6 @@ namespace Viewer
                 if (nKeysDown.Contains(120))
                 {
                     _renderingOptions.FillTriangles = !_renderingOptions.FillTriangles;
-                    _bmpOutdated = true;
                 }
 
                 _prevPressed.Clear();
@@ -153,78 +155,72 @@ namespace Viewer
 
         private void Render()
         {
-            if (_bmpOutdated)
+            _canvas.Clear(_clearColor);
+
+            _entity.Draw(_canvas, _uniforms, _renderingOptions);
+
+            foreach (var light in _uniforms.lights)
             {
-                Clear(colorsBuffer, _clearColor);
-                Clear(zBuffer, float.MaxValue);
-
-                _entity.Draw(colorsBuffer, zBuffer, _uniforms, _renderingOptions);
-
-                foreach (var light in _uniforms.lights)
-                {
-                    light.Draw(colorsBuffer, zBuffer, _uniforms, _renderingOptions);
-                }
-
-                var colors = GetBMPColors(colorsBuffer);
-
-                lock (_bmp)
-                {
-                    while(!painted)
-                        Monitor.Wait(_bmp);
-
-                    var bitmapInfo = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, _bmp.PixelFormat);
-
-                    Marshal.Copy(colors, 0, bitmapInfo.Scan0, colors.Length);
-
-                    _bmp.UnlockBits(bitmapInfo);
-
-                    painted = false;
-
-                    Invalidate();
-                }
-
-                _bmpOutdated = false;
+                light.Draw(_canvas, _uniforms, _renderingOptions);
             }
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            ProcessFPS();
 
             lock (_bmp)
             {
-                if (_stretch)
-                {
-                    e.Graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
-                }
-                else
-                {
-                    e.Graphics.DrawImage(_bmp, 0, 0);
-                }
+                while (!painted)
+                    Monitor.Wait(_bmp);
 
-                painted = true;
-                Monitor.Pulse(_bmp);
+                painted = false;
             }
-        }
 
-        private DateTime fpsLastPrintTime = DateTime.Now;
-        private int fpsCounter = 0;
+            Array.Copy(_canvas.colors, _shadowColorBuffer, _canvas.colors.Length);
 
-        private void ProcessFPS()
-        {
-            fpsCounter++;
-
-            var curTime = DateTime.Now;
-
-            var sDiff = (curTime - fpsLastPrintTime).TotalSeconds;
-
-            if (sDiff > 1.0)
+            Task.Run(() =>
             {
-                lFPS.Text = $"FPS: {fpsCounter}";
-                fpsLastPrintTime = curTime;
-                fpsCounter = 0;
-            }
+                lock (_bmp)
+                {
+                    Canvas.GetBMPColors(_bmpColors, _shadowColorBuffer);
+
+                    var bitmapInfo = _bmp.LockBits(new Rectangle(0, 0, _bmp.Width, _bmp.Height), ImageLockMode.ReadWrite, _bmp.PixelFormat);
+
+                    Marshal.Copy(_bmpColors, 0, bitmapInfo.Scan0, _bmpColors.Length);
+
+                    _bmp.UnlockBits(bitmapInfo);
+
+                    var graphics = CreateGraphics();
+
+                    if (_stretch)
+                    {
+                        graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
+                    }
+                    else
+                    {
+                        graphics.DrawImage(_bmp, 0, 0);
+                    }
+
+                    painted = true;
+                    Monitor.Pulse(_bmp);
+                }
+            });
         }
+
+        //private DateTime fpsLastPrintTime = DateTime.Now;
+        //private int fpsCounter = 0;
+
+        //private void ProcessFPS()
+        //{
+        //    fpsCounter++;
+
+        //    var curTime = DateTime.Now;
+
+        //    var sDiff = (curTime - fpsLastPrintTime).TotalSeconds;
+
+        //    if (sDiff > 1.0)
+        //    {
+        //        lFPS.Text = $"FPS: {fpsCounter}";
+        //        fpsLastPrintTime = curTime;
+        //        fpsCounter = 0;
+        //    }
+        //}
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -284,61 +280,6 @@ namespace Viewer
 
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
-        private byte[] GetBMPColors(Vector4[,] colors)
-        {
-            int height = colors.GetLength(0);
-            int width = colors.GetLength(1);
-
-            byte[] bytes = new byte[colors.Length * 4];
-
-            int offset = 0;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    var byteColor = Vector4.Multiply(colors[y, x], 255);
-
-                    bytes[offset + 0] = (byte)byteColor.Z;
-                    bytes[offset + 1] = (byte)byteColor.Y;
-                    bytes[offset + 2] = (byte)byteColor.X;
-                    bytes[offset + 3] = (byte)byteColor.W;
-
-                    offset += 4;
-                }
-            }
-
-            return bytes;
-        }
-
-        private void Clear(Vector4[,] buffer, Vector4 value)
-        {
-            int height = buffer.GetLength(0);
-            int width = buffer.GetLength(1);
-
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    buffer[i, j] = _clearColor;
-                }
-            }
-        }
-
-        private void Clear(float[,] buffer, float value)
-        {
-            int height = buffer.GetLength(0);
-            int width = buffer.GetLength(1);
-
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    buffer[i, j] = value;
-                }
-            }
-        }
-
         private void cbMeshes_SelectedIndexChanged(object sender, EventArgs e)
         {
             var meshStr = (string)((ComboBox)sender).SelectedItem;
@@ -346,11 +287,6 @@ namespace Viewer
             _entity.SetMesh(_meshes[meshStr].create());
 
             ShowVerticesCount();
-
-            lock (_inputLock)
-            {
-                _bmpOutdated = true;
-            }
 
             HideButtons();
         }
@@ -453,11 +389,6 @@ namespace Viewer
         {
             _uniforms.ambientColor = GetColorFromUser(_uniforms.ambientColor);
 
-            lock (_inputLock)
-            {
-                _bmpOutdated = true;
-            }
-
             HideButtons();
         }
 
@@ -465,22 +396,12 @@ namespace Viewer
         {
             _uniforms.lights[0].ColorDiffuse = GetColorFromUser(_uniforms.lights[0].ColorDiffuse);
 
-            lock (_inputLock)
-            {
-                _bmpOutdated = true;
-            }
-
             HideButtons();
         }
 
         private void btnSpecular_Click(object sender, EventArgs e)
         {
             _uniforms.lights[0].ColorSpecular = GetColorFromUser(_uniforms.lights[0].ColorSpecular);
-
-            lock (_inputLock)
-            {
-                _bmpOutdated = true;
-            }
 
             HideButtons();
         }

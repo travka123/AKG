@@ -9,9 +9,9 @@ namespace AKG.Rendering.ShaderIO
 {
     public struct FragmentShaderOutput
     {
-        public Vector4? color;
+        public Vector4 color;
 
-        public FragmentShaderOutput(Vector4? color)
+        public FragmentShaderOutput(Vector4 color)
         {
             this.color = color;
         }

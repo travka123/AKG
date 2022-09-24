@@ -1,6 +1,7 @@
 ﻿using AKG.Rendering.ShaderIO;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -11,12 +12,9 @@ namespace AKG.Rendering.Rasterisation
 {
     public class TriangleRasterisation<A, U> : Rasterisation<A, U>
     {
-        public override void Rasterize(Vector4[,] canvas, float[,] zBuffer, List<VertexShaderOutput[]> voTriangles, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
+        public override void Rasterize(Canvas canvas, List<VertexShaderOutput[]> voTriangles, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
         {
-            int canvasH = canvas.GetLength(0);
-            int canvasW = canvas.GetLength(1);
-
-            voTriangles = ClipTriangles(voTriangles, canvasW, canvasH);
+            voTriangles = ClipTriangles(voTriangles, canvas.width, canvas.height);
             voTriangles = CullingTriangles(voTriangles);
 
             if (shader.geometryShader is not null)
@@ -24,87 +22,99 @@ namespace AKG.Rendering.Rasterisation
 
             object drawLocker = new object();
 
-            voTriangles.AsParallel().ForAll((t) =>
+            var drawLine = (VertexShaderOutput a, VertexShaderOutput b, Action<int, int, VertexShaderOutput> callback) =>
             {
-                var drawLine = (VertexShaderOutput a, VertexShaderOutput b, Action<int, int, VertexShaderOutput> callback) =>
+                var aPixel = ScreenCoordinates.PixelFromNDC(a.position, canvas.width, canvas.height);
+                var bPixel = ScreenCoordinates.PixelFromNDC(b.position, canvas.width, canvas.height);
+
+                //DDA
+
+                int xl = Math.Abs((int)aPixel.X - (int)bPixel.X);
+                int yl = Math.Abs((int)aPixel.Y - (int)bPixel.Y);
+
+                int L = xl > yl ? xl : yl;
+
+                float xNDCStep = (b.position.X - a.position.X) / L;
+                float yNDCStep = (b.position.Y - a.position.Y) / L;
+
+                float xPixelStep = (bPixel.X - aPixel.X) / L;
+                float yPixelStep = (bPixel.Y - aPixel.Y) / L;
+
+                for (int i = 0; i < L; i++)
                 {
-                    var aPixel = ScreenCoordinates.PixelFromNDC(a.position, canvasW, canvasH);
-                    var bPixel = ScreenCoordinates.PixelFromNDC(b.position, canvasW, canvasH);
+                    var ndc = new Vector4(
+                        a.position.X + xNDCStep * i,
+                        a.position.Y + yNDCStep * i,
+                        Interpolate(0, L, a.position.Z, b.position.Z, i, a.W, b.W),
+                        1);
 
-                    //DDA
+                    float[] varying = Interpolate(0, L, a.varying, b.varying, i, a.W, b.W);
 
-                    int xl = Math.Abs((int)aPixel.X - (int)bPixel.X);
-                    int yl = Math.Abs((int)aPixel.Y - (int)bPixel.Y);
+                    int pixelX = (int)(aPixel.X + i * xPixelStep);
+                    int pixelY = (int)(aPixel.Y + i * yPixelStep);
 
-                    int L = xl > yl ? xl : yl;
+                    callback(pixelX, pixelY, new(ndc, varying, Interpolate(0, L, a.W, b.W, i, a.W, b.W)));
+                }
+            };
 
-                    float xNDCStep = (b.position.X - a.position.X) / L;
-                    float yNDCStep = (b.position.Y - a.position.Y) / L;
+            var drawCallback = (int pixelX, int pixelY, VertexShaderOutput vo) =>
+            {
+                int i = pixelY * canvas.width + pixelX;
 
-                    float xPixelStep = (bPixel.X - aPixel.X) / L;
-                    float yPixelStep = (bPixel.Y - aPixel.Y) / L;
-
-                    for (int i = 0; i < L; i++)
-                    {
-                        var ndc = new Vector4(
-                            a.position.X + xNDCStep * i, 
-                            a.position.Y + yNDCStep * i, 
-                            Interpolate(0, L, a.position.Z, b.position.Z, i, a.W, b.W), 
-                            1);
-
-                        float[] varying = Interpolate(0, L, a.varying, b.varying, i, a.W, b.W);
-
-                        int pixelX = (int)(aPixel.X + i * xPixelStep);
-                        int pixelY = (int)(aPixel.Y + i * yPixelStep);
-
-                        callback(pixelX, pixelY, new(ndc, varying, Interpolate(0, L, a.W, b.W, i, a.W, b.W)));
-                    }
-                };
-
-                var drawCallback = (int pixelX, int pixelY, VertexShaderOutput vo) =>
+                if (canvas.z[i] > vo.position.Z)
                 {
-                    var fo = shader.fragmentShader(new(vo.varying, uniforms, new Vector2(pixelX, pixelY)));
+                    canvas.z[i] = vo.position.Z;
+                    canvas.colors[i] = shader.fragmentShader(new(vo.varying, uniforms, new Vector2(pixelX, pixelY))).color;
+                }
+            };
 
-                    if (fo.color is not null)
-                    {
-                        SetColor(canvas, zBuffer, fo.color.Value, pixelX, pixelY, vo.position.Z, drawLocker);
-                    }
-                };
-
+            Parallel.ForEach(voTriangles, (t) =>
+            {
                 if (options.FillTriangles)
                 {
                     var boarders = new SortedDictionary<int, SortedDictionary<int, VertexShaderOutput>>();
 
                     var collectCallback = (int pixelX, int pixelY, VertexShaderOutput vo) =>
                     {
-                        var xDict = boarders.GetValueOrDefault(pixelY);
-                        if (xDict is null)
+                        var xsd = boarders.GetValueOrDefault(pixelY);
+
+                        if (xsd is null)
                         {
-                            xDict = new();
-                            boarders[pixelY] = xDict;
+                            xsd = new SortedDictionary<int, VertexShaderOutput>();
+                            boarders[pixelY] = xsd;
                         }
-                        xDict[pixelX] = vo;
+
+                        xsd[pixelX] = vo;
                     };
 
                     drawLine(t[0], t[1], collectCallback);
                     drawLine(t[1], t[2], collectCallback);
                     drawLine(t[2], t[0], collectCallback);
 
-                    foreach ((int pixelY, var xDict) in boarders)
+                    foreach ((int pixelY, var xsd) in boarders)
                     {
-                        var list = xDict.ToList();
+                        var kvpItr = xsd.GetEnumerator();
 
-                        for (int i = 1; i < list.Count; i++)
+                        kvpItr.MoveNext();
+                        var kvpPrev = kvpItr.Current;
+
+                        for (int i = 1; kvpItr.MoveNext(); i++)
                         {
-                            if (list[i].Key - list[i - 1].Key > 1)
+                            var kvpCurr = kvpItr.Current;
+
+                            if (kvpCurr.Key - kvpPrev.Key > 1)
                             {
-                                drawLine(list[i - 1].Value, list[i].Value, drawCallback);
+                                drawLine(kvpPrev.Value, kvpCurr.Value, drawCallback);
                             }
-                            else if (list[i].Key - list[i - 1].Key == 1)
+                            else if (kvpCurr.Key - kvpPrev.Key == 1)
                             {
-                                drawCallback(list[i - 1].Key, pixelY, list[i - 1].Value);
+                                drawCallback(kvpPrev.Key, pixelY, kvpPrev.Value);
                             }
+
+                            kvpPrev = kvpItr.Current;
                         }
+
+                        //drawLine(kvpPrev.Value, kvpCurr.Value, drawCallback);
                     }
                 }
                 else
@@ -130,6 +140,7 @@ namespace AKG.Rendering.Rasterisation
             float w2 = 1 - w1;
 
             float[] result = new float[val1.Length];
+
             for (int i = 0; i < val1.Length; i++)
             {
                 result[i] = w1 * val1[i] + w2 * val2[i];
@@ -145,9 +156,12 @@ namespace AKG.Rendering.Rasterisation
             float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
-            float d = w1 / z1 + w2 / z2;
+            float w1dz1 = w1 / z1;
+            float w2dz2 = w2 / z2;
 
-            return (w1 * val1 / z1 + w2 * val2 / z2) / d;
+            float d = w1dz1 + w2dz2;
+
+            return (w1dz1 * val1 + w2dz2 * val2) / d;
         }
 
         private float[] Interpolate(float start, float end, float[] val1, float[] val2, float position, float z1, float z2)
@@ -157,12 +171,16 @@ namespace AKG.Rendering.Rasterisation
             float w1 = (end - position) / (end - start);
             float w2 = 1 - w1;
 
-            float d = w1 / z1 + w2 / z2;
+            float w1dz1 = w1 / z1;
+            float w2dz2 = w2 / z2;
+
+            float d = w1dz1 + w2dz2;
 
             float[] result = new float[val1.Length];
+
             for (int i = 0; i < val1.Length; i++)
             {
-                result[i] = (w1 * val1[i] / z1 + w2 * val2[i] / z2) / d;
+                result[i] = (w1dz1 * val1[i] + w2dz2 * val2[i]) / d;
             }
 
             return result;

@@ -45,9 +45,9 @@ namespace AKG.Viewer
             _renderer = new Renderer<Vector4, Uniforms>(shaderProgram);
         }
 
-        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
+        public void Draw(Canvas canvas, Uniforms uniforms, RenderingOptions options)
         {
-            _renderer.Draw(colors, zBuffer, _vertices, new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
+            _renderer.Draw(canvas, _vertices, new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
         }
 
         private VertexShaderOutput VertexShader(VertexShaderInput<Vector4, Uniforms> vi)

@@ -98,11 +98,11 @@ namespace AKG.Viewer.Meshes
             _renderer = new Renderer<Attributes, Uniforms>(shader);
         }
 
-        public void Draw(Vector4[,] colors, float[,] zBuffer, Viewer.Uniforms uniforms, RenderingOptions options)
+        public void Draw(Canvas canvas, Viewer.Uniforms uniforms, RenderingOptions options)
         {
             foreach (var model in _models)
             {
-                _renderer.Draw(colors, zBuffer, model.attributes, new Uniforms(uniforms.MVP, uniforms.M,
+                _renderer.Draw(canvas, model.attributes, new Uniforms(uniforms.MVP, uniforms.M,
                     uniforms.ambientColor, uniforms.lights, model, uniforms.camera), options);
             }
         }

@@ -20,10 +20,10 @@ namespace AKG.Viewer
 
         private Mesh? _mesh;
 
-        public void Draw(Vector4[,] colors, float[,] zBuffer, Uniforms uniforms, RenderingOptions options)
+        public void Draw(Canvas canvas, Uniforms uniforms, RenderingOptions options)
         {
             if (_mesh is not null)
-            _mesh.Draw(colors, zBuffer, new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
+            _mesh.Draw(canvas, new Uniforms(uniforms, Matrix4x4.CreateWorld(Position, Direction, _up)), options);
         }
 
         public void SetMesh(Mesh mesh)
