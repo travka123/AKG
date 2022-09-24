@@ -179,7 +179,7 @@ namespace AKG.Rendering.Rasterisation
                        vec.Z >= -1 && vec.Z <= 1;
             };
 
-            return vo.Where((vo) => vo.All((vo) => checkVec(vo.position))).ToList();
+            return vo.AsParallel().Where((vo) => vo.All((vo) => checkVec(vo.position))).ToList();
         }
 
         private List<VertexShaderOutput[]> CullingTriangles(List<VertexShaderOutput[]> vo)
@@ -191,7 +191,7 @@ namespace AKG.Rendering.Rasterisation
                 triangle[2].position.X * triangle[0].position.Y - triangle[0].position.X * triangle[2].position.Y > 0;
 
             };
-            return vo.Where((vo) => isCounterClockWise(vo)).ToList();
+            return vo.AsParallel().Where((vo) => isCounterClockWise(vo)).ToList();
         }
     }
 }
