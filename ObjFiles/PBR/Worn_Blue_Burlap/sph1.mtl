@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo worn-blue-burlap-albedo.png
+map_bump worn-blue-burlap-Normal-dx.png
+map_metallic worn-blue-burlap-Metallic.png
+map_roughness worn-blue-burlap-Roughness.png
+map_ao worn-blue-burlap-ao.png

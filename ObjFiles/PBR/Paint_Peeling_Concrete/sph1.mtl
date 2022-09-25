@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo paint-peeling-albedo.png
+map_bump paint-peeling-normal.png
+map_metallic paint-peeling-metalness.png
+map_roughness paint-peeling-roughness.png
+map_ao paint-peeling-ao.png

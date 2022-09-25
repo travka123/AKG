@@ -42,6 +42,7 @@ namespace Rendering
                 { "map_metallic", (s) => builder.SetMapMetallic(s.Replace("\\\\", "\\")) },
                 { "map_roughness", (s) => builder.SetMapRoughness(s.Replace("\\\\", "\\")) },
                 { "map_AO", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
+                { "map_ao", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
                 { "refl", (s) => { } },
                 { "Tf", (s) => { } },
                 { "Tr", (s) => { } },

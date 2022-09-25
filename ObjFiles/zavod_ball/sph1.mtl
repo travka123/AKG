@@ -1,8 +1,0 @@
-# Blender 3.3.0 MTL File: 'None'
-# www.blender.org
-
-newmtl pbr
-map_albedo rustediron2_basecolor.png
-map_bump rustediron2_normal.png
-map_metallic rustediron2_metallic.png
-map_roughness rustediron2_roughness.png

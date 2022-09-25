@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo black-white-tile_albedo.png
+map_bump black-white-tile_normal-dx.png
+map_metallic black-white-tile_metallic.png
+map_roughness black-white-tile_roughness.png
+map_ao black-white-tile_ao.png

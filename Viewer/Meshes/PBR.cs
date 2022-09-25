@@ -157,6 +157,7 @@ namespace AKG.Viewer.Meshes
             color.Z = Math.Min(color.Z, 1.0f);
 
             //HDR?
+            //color = color / (color + Vector3.One);
             //color.X = (float)Math.Pow(color.X, 1.0f / 2.2f);
             //color.Y = (float)Math.Pow(color.Y, 1.0f / 2.2f);
             //color.Z = (float)Math.Pow(color.Z, 1.0f / 2.2f);
