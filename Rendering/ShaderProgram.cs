@@ -13,5 +13,14 @@ namespace AKG.Rendering
         public Func<VertexShaderInput<A, U>, VertexShaderOutput> vertexShader;
         public Action<GeometryShaderInput<U>>? geometryShader;
         public Func<FragmentShaderInput<U>, FragmentShaderOutput> fragmentShader;
+
+        public ShaderProgram(Func<VertexShaderInput<A, U>, VertexShaderOutput> vertexShader,             
+            Func<FragmentShaderInput<U>, FragmentShaderOutput> fragmentShader,
+            Action<GeometryShaderInput<U>>? geometryShader = null)
+        {
+            this.vertexShader = vertexShader;
+            this.geometryShader = geometryShader;
+            this.fragmentShader = fragmentShader;
+        }
     }
 }

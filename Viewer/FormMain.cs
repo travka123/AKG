@@ -40,7 +40,7 @@ namespace Viewer
 
         private RenderingOptions _renderingOptions;
 
-        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
+        private Vector4 _clearColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
 
         Canvas _canvas;
 
@@ -64,7 +64,11 @@ namespace Viewer
 
             _input = new();
 
-            var lights = new List<LightBox>() { new LightBox(new(10, 10, 10), new Vector3(1, 1, 1)) };
+            var lights = new List<LightBox>() {
+                new LightBox(new(-10,  10, 15), new Vector3(1, 1, 0)),
+                new LightBox(new( 10,  10, 15), new Vector3(1, 0, 1)),
+                new LightBox(new(  0, -10, 15), new Vector3(0, 1, 1)),
+            };
 
             var camera = new SCamera();
 
@@ -76,7 +80,7 @@ namespace Viewer
 
             _uniforms = new Uniforms(camera, lights);
 
-            _uniforms.ambientColor = new Vector3(0.3f, 0.3f, 0.3f);
+            _uniforms.ambientColor = new Vector3(0.0f, 0.0f, 0.0f);
 
             _renderingOptions = new RenderingOptions();
             _renderingOptions.FillTriangles = true;
@@ -95,6 +99,7 @@ namespace Viewer
                 { "phong", (Phong.ModelBuildConfig, () => new Phong(_builder)) },
                 { "textured", (Textured.ModelBuildConfig, () => new Textured(_builder)) },
                 { "bump maps", (TBSMap.ModelBuildConfig, () => new TBSMap(_builder)) },
+                { "PBR", (PBR.ModelBuildConfig, () => new PBR(_builder)) },
             };
 
             _selectables = new Dictionary<string, Func<Positionable>>()

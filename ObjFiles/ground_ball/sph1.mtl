@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo wispy-grass-meadow_albedo.png
+map_bump wispy-grass-meadow_normal-ogl.png
+map_metallic wispy-grass-meadow_metallic.png
+map_roughness wispy-grass-meadow_roughness.png
+map_AO wispy-grass-meadow_ao.png

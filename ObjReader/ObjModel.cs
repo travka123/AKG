@@ -16,5 +16,9 @@ namespace AKG.ObjReader
         public Image<Rgba32>? mapKd;
         public Image<Rgba32>? mapKs;
         public Image<Rgba32>? mapBump;
+        public Image<Rgba32>? mapAlbedo;
+        public Image<Rgba32>? mapMetallic;
+        public Image<Rgba32>? mapRoughness;
+        public Image<Rgba32>? mapAO;
     }
 }

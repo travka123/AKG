@@ -97,6 +97,10 @@ namespace Rendering
             public string? mapKd;
             public string? mapKs;
             public string? mapBump;
+            public string? mapAlbedo;
+            public string? mapMetallic;
+            public string? mapRoughness;
+            public string? mapAO;
         }
 
         private Dictionary<string, Material> _materials = new();
@@ -176,6 +180,32 @@ namespace Rendering
             _currentMaterial.mapBump = file;
         }
 
+        bool usePBR = false;
+
+        public void SetMapAlbedo(string file)
+        {
+            usePBR = true;
+            _currentMaterial.mapAlbedo = file;
+        }
+
+        public void SetMapMetallic(string file)
+        {
+            usePBR = true;
+            _currentMaterial.mapMetallic = file;
+        }
+
+        public void SetMapRoughness(string file)
+        {
+            usePBR = true;
+            _currentMaterial.mapRoughness = file;
+        }
+
+        public void SetMapAO(string file)
+        {
+            usePBR = true;
+            _currentMaterial.mapAO = file;
+        }
+
         public ObjModelConfig BuildConfig()
         {
             PushRegion();
@@ -198,9 +228,11 @@ namespace Rendering
 
             if (useNs) result.Attributes.Add(ObjModelAttr.Ns);
 
-            result.containTextures = useTextures;
+            result.ContainTextures = useTextures;
 
-            result.containBump = useBumpFile;
+            result.ContainBump = useBumpFile;
+
+            result.PBR = usePBR;
 
             return result;
         }
@@ -359,7 +391,11 @@ namespace Rendering
                 model.mapKd = BufferLoad(material?.mapKd, textures);
                 model.mapKs = BufferLoad(material?.mapKs, textures);
                 model.mapBump = BufferLoad(material?.mapBump, textures);
-
+                model.mapAlbedo = BufferLoad(material?.mapAlbedo, textures);
+                model.mapMetallic = BufferLoad(material?.mapMetallic, textures);
+                model.mapRoughness = BufferLoad(material?.mapRoughness, textures);
+                model.mapAO = BufferLoad(material?.mapAO, textures);
+                
                 var floats = new List<float>();
 
                 foreach (var faces in objFaces.faceLines)

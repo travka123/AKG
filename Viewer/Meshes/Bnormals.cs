@@ -9,6 +9,8 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using AKG.ObjReader;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace AKG.Viewer.Meshes
 {
@@ -33,6 +35,7 @@ namespace AKG.Viewer.Meshes
         {
             public Matrix4x4 MVP;
             public Matrix4x4 M;
+            public Matrix4x4 tiM;
             public Vector3 ambientColor;
             public List<LightBox> lights;
             public ObjModel<Attributes> model;
@@ -47,6 +50,10 @@ namespace AKG.Viewer.Meshes
                 this.lights = lights;
                 this.model = model;
                 this.camera = camera;
+
+                tiM = new Matrix4x4();
+                Matrix4x4.Invert(M, out tiM);
+                tiM = Matrix4x4.Transpose(tiM);
             }
         }
 
@@ -62,40 +69,47 @@ namespace AKG.Viewer.Meshes
 
             shader.vertexShader = (vi) =>
             {
-                var position = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
+                var positionMVP = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
-                float[] varying = new float[6];
+                float[] varying = new float[4 + 3 + 3];
 
-                varying[0] = Math.Max(vi.attribute.normal.X, 0);
-                varying[1] = Math.Max(vi.attribute.normal.Y, 0);
-                varying[2] = Math.Max(vi.attribute.normal.Z, 0);
+                var positionM = Vector4.Transform(vi.attribute.position, vi.uniforms.M);
+                var normalM = Vector3.Transform(vi.attribute.normal, vi.uniforms.tiM);
 
-                vi.attribute.texCords.CopyTo(varying, 3);
+                positionM.CopyTo(varying, 0);
+                vi.attribute.texCords.CopyTo(varying, 4);
+                normalM.CopyTo(varying, 7);
 
-                return new(position, varying);
+                return new(positionMVP, varying);
             };
 
             shader.fragmentShader = (fi) =>
             {
-                var texCords = new Vector3(new ReadOnlySpan<float>(fi.varying, 3, 3));
+                var span = new ReadOnlySpan<float>(fi.varying);
 
-                var normal = new Vector3(new ReadOnlySpan<float>(fi.varying, 0, 3));
+                var position = new Vector4(span.Slice(0, 4));
+                var texCords = new Vector3(span.Slice(4, 3));
+                var normal = new Vector3(span.Slice(7, 3));
 
-                var bump = fi.uniforms.model.mapBump!;
+                normal = Vector3.Normalize(normal) * GetFromTexture(fi.uniforms.model.mapBump, texCords);
 
-                if (bump is not null)
-                {
-                    var bv = bump[(int)((bump.Width - 1) * texCords.X), (int)((bump.Height - 1) * (1 - texCords.Y))].ToScaledVector4();
-
-                    normal = Vector3.Multiply(normal, new Vector3(bv.X, bv.Y, bv.Z));
-                }
-
-                var normalM = Vector4.Transform(new Vector4(normal, 0), fi.uniforms.M);
-
-                return new(new(normalM.X, normalM.Y, normalM.Z, 1.0f));
+                return new(new(Math.Clamp(normal.X, 0, 1), Math.Clamp(normal.Y, 0, 1), Math.Clamp(normal.Z, 0, 1), 1.0f));
             };
 
             _renderer = new Renderer<Attributes, Uniforms>(shader);
+        }
+
+        private static Vector3 GetFromTexture(Image<Rgba32>? image, Vector3 texCords)
+        {
+            if (image is null)
+                return Vector3.One;
+
+            int x = (int)((image.Width - 1) * texCords.X);
+            int y = (int)((image.Height - 1) * (1 - texCords.Y));
+
+            var rgba32 = image[x, y].ToScaledVector4();
+
+            return new Vector3(rgba32.X, rgba32.Y, rgba32.Z);
         }
 
         public void Draw(Canvas canvas, Viewer.Uniforms uniforms, RenderingOptions options)
