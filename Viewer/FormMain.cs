@@ -40,7 +40,7 @@ namespace Viewer
 
         private RenderingOptions _renderingOptions;
 
-        private Vector4 _clearColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
+        private Vector4 _clearColor = new Vector4(0.2f, 0.3f, 0.3f, 1.0f);
 
         Canvas _canvas;
 
@@ -48,7 +48,13 @@ namespace Viewer
 
         private ObjModelBuilder _builder = null!;
 
-        private CameraControl _controls = null!;
+        private CameraControl _controls;
+
+        private bool PBRDemo = false;
+
+        private List<string> _models;
+
+        private ImageAttributes _imageAttributes = new ImageAttributes();
 
         public FormMain()
         {
@@ -64,12 +70,6 @@ namespace Viewer
 
             _input = new();
 
-            var lights = new List<LightBox>() {
-                new LightBox(new(-10,  10, 15), new Vector3(1, 1, 0)),
-                new LightBox(new( 10,  10, 15), new Vector3(1, 0, 1)),
-                new LightBox(new(  0, -10, 15), new Vector3(0, 1, 1)),
-            };
-
             var camera = new SCamera();
 
             camera.SetProjection(Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 180 * 70, (float)Width / Height, 0.01f, 300f));
@@ -77,6 +77,11 @@ namespace Viewer
             camera.SetPosition(new Vector3(5, 0, 30));
 
             _entity = new Entity();
+
+            var lights = new List<LightBox>()
+            {
+                new LightBox(new Vector3(5, 5, 5), new Vector3(1, 1, 1)),
+            };
 
             _uniforms = new Uniforms(camera, lights);
 
@@ -87,7 +92,13 @@ namespace Viewer
 
             var opt = new EnumerationOptions();
             opt.RecurseSubdirectories = true;
-            var files = Directory.EnumerateFiles(PATH, "*.obj", opt);
+            _models = Directory.EnumerateFiles(PATH, "*.obj", opt).ToList();
+
+            _entity = new Entity();
+
+            _controls = new FlyingCameraControls(_uniforms.camera);
+
+            _uniforms.lights = new List<LightBox>() { new LightBox(new(5, 5, 5), new Vector3(1, 1, 1)) };
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
@@ -105,11 +116,11 @@ namespace Viewer
             _selectables = new Dictionary<string, Func<Positionable>>()
             {
                 { "camera", () => _uniforms.camera },
-                { "light", () => lights[0] },
+                { "light", () => _uniforms.lights[0] },
                 { "mesh", () => _entity },
             };
 
-            cbModels.DataSource = files.Select(f => f.Substring(PATH.Length)).ToList();
+            cbModels.DataSource = _models.Select(f => f.Substring(PATH.Length)).ToList();
             cbSelectedMesh.DataSource = _selectables.Keys.ToList();
         }
 
@@ -149,6 +160,11 @@ namespace Viewer
                 if (nKeysDown.Contains(120))
                 {
                     _renderingOptions.FillTriangles = !_renderingOptions.FillTriangles;
+                }
+
+                if (nKeysDown.Contains(115))
+                {
+                    Invoke(() => SwitchPBRDemo());
                 }
 
                 _prevPressed.Clear();
@@ -191,15 +207,18 @@ namespace Viewer
 
                     _bmp.UnlockBits(bitmapInfo);
 
-                    var graphics = CreateGraphics();
+                    try
+                    {
+                        Invoke(() =>
+                        {
+                            var graphics = CreateGraphics();
 
-                    if (_stretch)
-                    {
-                        graphics.DrawImage(_bmp, 0, 0, this.Width, this.Height);
+                            graphics.DrawImage(_bmp, new Rectangle(0, 0, this.Width, this.Height), 0, 0, _bmp.Width, _bmp.Height, GraphicsUnit.Pixel, _imageAttributes);
+                        });
                     }
-                    else
+                    finally
                     {
-                        graphics.DrawImage(_bmp, 0, 0);
+
                     }
 
                     painted = true;
@@ -226,6 +245,35 @@ namespace Viewer
         //        fpsCounter = 0;
         //    }
         //}
+
+        private void SwitchPBRDemo()
+        {
+            if (!PBRDemo)
+            {
+                PBRDemo = true;
+
+                HideButtons();
+                lVertices.Hide();
+                btnShow.Hide();
+
+                _imageAttributes.SetGamma(2.2f);
+
+                _uniforms.lights = new List<LightBox>() {
+                    new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0)),
+                    new LightBox(new( 10,  10,  15), new Vector3(1, 0, 1)),
+                    new LightBox(new(  0, -10,  15), new Vector3(0, 1, 1)),
+                    new LightBox(new(  0,   0, -15), new Vector3(1, 1, 1)),
+                };
+
+                _controls = new FlyingCameraControls(_uniforms.camera);
+
+                _clearColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
+
+                _uniforms.ambientColor = new Vector3(0.1f, 0.1f, 0.1f);
+
+                _entity.SetMesh(new PBRDemo(_models.Where(f => f.Contains("ObjFiles\\PBR\\")).ToList()));
+            }
+        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {

@@ -1,5 +1,6 @@
 ﻿using AKG.Rendering.ShaderIO;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -18,7 +19,10 @@ namespace AKG.Rendering.Rasterisation
             voTriangles = CullingTriangles(voTriangles);
 
             if (shader.geometryShader is not null)
-                Parallel.ForEach(voTriangles, (vo) => shader.geometryShader(new GeometryShaderInput<U>(vo, uniforms)));
+            {
+                voTriangles = voTriangles.AsParallel().SelectMany((vo) => shader.geometryShader(new GeometryShaderInput<U>(vo, uniforms))).ToList();
+                voTriangles = ClipTriangles(voTriangles, canvas.width, canvas.height);
+            }
 
             object drawLocker = new object();
 
@@ -63,8 +67,14 @@ namespace AKG.Rendering.Rasterisation
 
                 if (canvas.z[i] > vo.position.Z)
                 {
-                    canvas.z[i] = vo.position.Z;
-                    canvas.colors[i] = shader.fragmentShader(new(vo.varying, uniforms, new Vector2(pixelX, pixelY))).color;
+                    lock (canvas.lockers[i])
+                    {
+                        if (canvas.z[i] > vo.position.Z)
+                        {
+                            canvas.z[i] = vo.position.Z;
+                            canvas.colors[i] = shader.fragmentShader(new(vo.varying, uniforms, new Vector2(pixelX, pixelY))).color;
+                        }
+                    }  
                 }
             };
 

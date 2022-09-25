@@ -101,6 +101,7 @@ namespace Rendering
             public string? mapMetallic;
             public string? mapRoughness;
             public string? mapAO;
+            public string? mapHeight;
         }
 
         private Dictionary<string, Material> _materials = new();
@@ -204,6 +205,12 @@ namespace Rendering
         {
             usePBR = true;
             _currentMaterial.mapAO = file;
+        }
+
+        internal void SetMapHeight(string file)
+        {
+            usePBR = true;
+            _currentMaterial.mapHeight = file;
         }
 
         public ObjModelConfig BuildConfig()
@@ -395,6 +402,7 @@ namespace Rendering
                 model.mapMetallic = BufferLoad(material?.mapMetallic, textures);
                 model.mapRoughness = BufferLoad(material?.mapRoughness, textures);
                 model.mapAO = BufferLoad(material?.mapAO, textures);
+                model.mapHeight = BufferLoad(material?.mapHeight, textures);
                 
                 var floats = new List<float>();
 

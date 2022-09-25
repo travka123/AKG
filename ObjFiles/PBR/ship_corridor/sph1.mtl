@@ -1,0 +1,10 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo ship-corridor_albedo.png
+map_bump ship-corridor_normal-ogl.png
+map_metallic ship-corridor_metallic.png
+map_roughness ship-corridor_roughness.png
+map_ao ship-corridor_ao.png
+map_height ship-corridor_height.png

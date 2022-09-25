@@ -22,6 +22,7 @@ namespace AKG.Viewer.Meshes
             public List<LightBox> lights;
             public Matrix4x4 MVP;
             public Matrix4x4 M;
+            public Matrix4x4 VP;
             public Matrix4x4 TIM;
             public Vector3 ambientColor;
             public Vector3 camPos;
@@ -31,12 +32,14 @@ namespace AKG.Viewer.Meshes
             public Image<Rgba32>? metallic;
             public Image<Rgba32>? roughness;
             public Image<Rgba32>? ao;
+            public Image<Rgba32>? height;
             
             public CustomUniforms(Uniforms uniforms, ObjModel<Attributes> objModel)
             {
                 lights = uniforms.lights;
                 MVP = uniforms.MVP;
                 M = uniforms.M;
+                VP = uniforms.camera.VP;
 
                 Matrix4x4.Invert(M, out TIM);
                 TIM = Matrix4x4.Transpose(TIM);
@@ -49,6 +52,7 @@ namespace AKG.Viewer.Meshes
                 metallic = objModel.mapMetallic;
                 roughness = objModel.mapRoughness;
                 ao = objModel.mapAO;
+                height = objModel.mapHeight;
             }
         }
 
@@ -93,6 +97,117 @@ namespace AKG.Viewer.Meshes
 
             return new(positionMVP, varying);
         }
+
+        private struct ExtendedVertexShaderOutput
+        {
+            public VertexShaderOutput vo;
+            public Vector3 positionM;
+            public Vector3 normal;
+            public float height;
+
+            public ExtendedVertexShaderOutput(VertexShaderOutput vo, Vector3 position, Vector3 normal, float height)
+            {
+                this.vo = vo;
+                this.positionM = position;
+                this.normal = normal;
+                this.height = height;
+            }
+        }
+
+        //private static List<VertexShaderOutput[]> GeometryShader(GeometryShaderInput<CustomUniforms> go)
+        //{
+        //    if (go.uniforms.height is null)
+        //        return new() { go.vo };
+
+        //    var s1 = new ReadOnlySpan<float>(go.vo[0].varying);
+        //    var s2 = new ReadOnlySpan<float>(go.vo[1].varying);
+        //    var s3 = new ReadOnlySpan<float>(go.vo[2].varying);
+
+        //    var position = new Vector3[] { new Vector3(s1.Slice(0, 3)), new Vector3(s2.Slice(0, 3)), new Vector3(s3.Slice(0, 3)) };
+        //    var texCords = new Vector3[] { new Vector3(s1.Slice(3, 3)), new Vector3(s2.Slice(3, 3)), new Vector3(s3.Slice(3, 3)) };
+        //    var normals = new Vector3[] { new Vector3(s1.Slice(6, 3)), new Vector3(s2.Slice(6, 3)), new Vector3(s3.Slice(6, 3)) };
+
+        //    var triangles = new List<VertexShaderOutput[]>();
+
+        //    for (int i = 0; i < 3; i++)
+        //        normals[i] = Vector3.Normalize(normals[i]) * GetFromTexture(go.uniforms.bump, texCords[i]);
+
+        //    Span<float> h = stackalloc float[3];
+        //    for (int i = 0; i < 3; i++)
+        //        h[i] = GetFromTexture(go.uniforms.height, texCords[i]).X;
+
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        position[i] += 0.1f * h[i] * normals[i];
+
+        //        var positionMVP = Vector4.Transform(new Vector4(position[i], 1.0f), go.uniforms.VP);
+
+        //        go.vo[i].W = positionMVP.W;
+        //        go.vo[i].position = positionMVP / positionMVP.W;
+        //        position[i].CopyTo(go.vo[i].varying, 0);
+        //    }
+
+        //    var evo = new ExtendedVertexShaderOutput[3];
+        //    for (int i = 0; i < 3; i++)
+        //        evo[i] = new ExtendedVertexShaderOutput(go.vo[i], position[i], normals[i], h[i]);
+
+        //    DivideTriangle(evo, go, triangles, 0);
+
+        //    return triangles;
+        //}
+
+        //private static void DivideTriangle(ExtendedVertexShaderOutput[] evo, GeometryShaderInput<CustomUniforms> go, List<VertexShaderOutput[]> triangles, int itr)
+        //{
+        //    var mvp1 = new Vector3(evo[0].vo.position.X, evo[0].vo.position.Y, evo[0].vo.position.Z);
+        //    var mvp2 = new Vector3(evo[1].vo.position.X, evo[1].vo.position.Y, evo[1].vo.position.Z);
+        //    var mvp3 = new Vector3(evo[2].vo.position.X, evo[2].vo.position.Y, evo[2].vo.position.Z);
+
+        //    if ((itr > 5) || (float)Math.Abs(Vector3.Cross(mvp1 - mvp3, mvp2 - mvp3).Length()) < 0.0001f)
+        //    {
+        //        triangles.Add(new VertexShaderOutput[] { evo[0].vo, evo[1].vo, evo[2].vo });
+        //        return;
+        //    }
+
+        //    float[] centerVaryings = new float[evo[0].vo.varying.Length];
+
+        //    for (int i = 0; i < evo[0].vo.varying.Length; i++)
+        //        centerVaryings[i] = (evo[0].vo.varying[i] + evo[1].vo.varying[i] + evo[2].vo.varying[i]) / 3;
+
+        //    var centerPosition = new Vector3(centerVaryings[0], centerVaryings[1], centerVaryings[2]);
+        //    var centerTexCords = new Vector3(centerVaryings[3], centerVaryings[4], centerVaryings[5]);
+
+        //    var centerNormal = new Vector3(centerVaryings[6], centerVaryings[7], centerVaryings[8]);
+        //    centerNormal = Vector3.Normalize(centerNormal) * GetFromTexture(go.uniforms.bump, centerTexCords);
+
+        //    var centerH = GetFromTexture(go.uniforms.height, centerTexCords).X;
+
+        //    centerPosition += 0.1f * centerH * centerNormal;
+
+        //    var centerPositionMVP = Vector4.Transform(new Vector4(centerPosition, 1.0f), go.uniforms.VP);
+
+        //    var cvo = new VertexShaderOutput(centerPositionMVP / centerPositionMVP.W, centerVaryings, centerPositionMVP.W);
+
+        //    var centerEvo = new ExtendedVertexShaderOutput(cvo, centerPosition, centerNormal, centerH);
+
+        //    var nEvo = new ExtendedVertexShaderOutput[3];
+
+        //    itr++;
+
+        //    nEvo[0] = centerEvo;
+        //    nEvo[1] = evo[0];
+        //    nEvo[2] = evo[1];
+        //    DivideTriangle(nEvo, go, triangles, itr);
+
+        //    nEvo[0] = centerEvo;
+        //    nEvo[1] = evo[1];
+        //    nEvo[2] = evo[2];
+        //    DivideTriangle(nEvo, go, triangles, itr);
+
+        //    nEvo[0] = centerEvo;
+        //    nEvo[1] = evo[2];
+        //    nEvo[2] = evo[0];
+        //    DivideTriangle(nEvo, go, triangles, itr);
+        //}
 
         private static FragmentShaderOutput FragmentShader(FragmentShaderInput<CustomUniforms> fi)
         {
@@ -152,15 +267,11 @@ namespace AKG.Viewer.Meshes
 
             var color = Lo + ambient;
 
-            color.X = Math.Min(color.X, 1.0f);
-            color.Y = Math.Min(color.Y, 1.0f);
-            color.Z = Math.Min(color.Z, 1.0f);
-
-            //HDR?
-            //color = color / (color + Vector3.One);
-            //color.X = (float)Math.Pow(color.X, 1.0f / 2.2f);
-            //color.Y = (float)Math.Pow(color.Y, 1.0f / 2.2f);
-            //color.Z = (float)Math.Pow(color.Z, 1.0f / 2.2f);
+            //HDR
+            color = color / (color + Vector3.One);
+            color.X = (float)Math.Pow(color.X, 1.0f / 2.2f);
+            color.Y = (float)Math.Pow(color.Y, 1.0f / 2.2f);
+            color.Z = (float)Math.Pow(color.Z, 1.0f / 2.2f);
 
             return new(new(color.X, color.Y, color.Z, 1.0f));
         }

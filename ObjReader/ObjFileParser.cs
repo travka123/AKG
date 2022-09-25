@@ -43,6 +43,7 @@ namespace Rendering
                 { "map_roughness", (s) => builder.SetMapRoughness(s.Replace("\\\\", "\\")) },
                 { "map_AO", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
                 { "map_ao", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
+                { "map_height", (s) => builder.SetMapHeight(s.Replace("\\\\", "\\")) },
                 { "refl", (s) => { } },
                 { "Tf", (s) => { } },
                 { "Tr", (s) => { } },

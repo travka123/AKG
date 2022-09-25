@@ -13,6 +13,7 @@ namespace AKG.Rendering
         public int width;
         public Vector4[] colors;
         public float[] z;
+        public readonly object[] lockers;
 
         public Canvas(int height, int width)
         {
@@ -20,6 +21,10 @@ namespace AKG.Rendering
             this.width = width;
             colors = new Vector4[height * width];
             z = new float[height * width];
+
+            lockers = new object[height * width];
+            for (int i = 0; i < lockers.Length; i++)
+                lockers[i] = new object();
         }
 
         public void Clear(Vector4 clearColor)

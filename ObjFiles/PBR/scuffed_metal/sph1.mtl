@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo scuffed-metal1_albedo.png
+map_bump scuffed-metal1_normal-ogl.png
+map_metallic scuffed-metal1_metallic.png
+map_roughness scuffed-metal1_roughness.png
+map_ao scuffed-metal1_ao.png

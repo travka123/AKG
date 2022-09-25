@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo pirate-gold_albedo.png
+map_bump pirate-gold_normal-ogl.png
+map_metallic pirate-gold_metallic.png
+map_roughness pirate-gold_roughness.png
+map_ao pirate-gold_ao.png

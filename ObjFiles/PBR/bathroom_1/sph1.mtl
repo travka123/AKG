@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo bathroomtile1_basecolor.png
+map_bump bathroomtile1_normal-ogl.png
+map_metallic bathroomtile1_metalness.png
+map_roughness bathroomtile1_roughness.png
+map_ao bathroomtile1_ao.png

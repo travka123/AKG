@@ -87,6 +87,8 @@ namespace AKG.Viewer.Meshes
                 {
                     diffuse.CopyTo(gi.vo[i].varying, 0);
                 }
+
+                return new() { gi.vo };
             };
 
             shader.fragmentShader = (fi) =>

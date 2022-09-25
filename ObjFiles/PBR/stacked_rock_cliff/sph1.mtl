@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo stacked-rock-cliff_albedo.png
+map_bump stacked-rock-cliff_normal-ogl.png
+map_metallic stacked-rock-cliff_metallic.png
+map_roughness stacked-rock-cliff_roughness.png
+map_ao stacked-rock-cliff_ao.png
