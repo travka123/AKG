@@ -9,5 +9,6 @@ namespace AKG.Rendering
     public class RenderingOptions
     {
         public bool FillTriangles { get; set; }
+        public bool UseTessellation { get; set; }
     }
 }

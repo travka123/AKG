@@ -14,15 +14,14 @@ namespace AKG.Rendering.Rasterisation
     public class TriangleRasterisation<A, U> : Rasterisation<A, U>
     {
         public override void Rasterize(Canvas canvas, List<VertexShaderOutput[]> voTriangles, ShaderProgram<A, U> shader, U uniforms, RenderingOptions options)
-        {
-            voTriangles = ClipTriangles(voTriangles, canvas.width, canvas.height);
-            voTriangles = CullingTriangles(voTriangles);
-
+        {      
             if (shader.geometryShader is not null)
             {
                 voTriangles = voTriangles.AsParallel().SelectMany((vo) => shader.geometryShader(new GeometryShaderInput<U>(vo, uniforms))).ToList();
-                voTriangles = ClipTriangles(voTriangles, canvas.width, canvas.height);
             }
+
+            voTriangles = ClipTriangles(voTriangles, canvas.width, canvas.height);
+            voTriangles = CullingTriangles(voTriangles);
 
             object drawLocker = new object();
 

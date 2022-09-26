@@ -33,8 +33,10 @@ namespace AKG.Viewer.Meshes
             public Image<Rgba32>? roughness;
             public Image<Rgba32>? ao;
             public Image<Rgba32>? height;
-            
-            public CustomUniforms(Uniforms uniforms, ObjModel<Attributes> objModel)
+
+            public int tessellationLvl;
+
+            public CustomUniforms(Uniforms uniforms, ObjModel<Attributes> objModel, int tessellationLvl)
             {
                 lights = uniforms.lights;
                 MVP = uniforms.MVP;
@@ -53,6 +55,8 @@ namespace AKG.Viewer.Meshes
                 roughness = objModel.mapRoughness;
                 ao = objModel.mapAO;
                 height = objModel.mapHeight;
+
+                this.tessellationLvl = tessellationLvl;
             }
         }
 
@@ -75,11 +79,23 @@ namespace AKG.Viewer.Meshes
 
         private ObjModel<Attributes>[] _modelParts;
 
+        private Vector4 _objModelCenter;
+
         public PBR(ObjModelBuilder builder)
         {
             _modelParts = builder.BuildByConfig<Attributes>(ModelBuildConfig);
 
-            _renderer = new Renderer<Attributes, CustomUniforms>(new(VertexShader, FragmentShader));
+            _objModelCenter = new Vector4();
+            foreach (var part in _modelParts)
+            {
+                foreach (var attr in part.attributes)
+                {
+                    _objModelCenter += attr.position;
+                }
+            }
+            _objModelCenter /= _objModelCenter.W;
+
+            _renderer = new Renderer<Attributes, CustomUniforms>(new(VertexShader, FragmentShader, GeometryShader));
         }
 
         private static VertexShaderOutput VertexShader(VertexShaderInput<Attributes, CustomUniforms> vi)
@@ -101,113 +117,90 @@ namespace AKG.Viewer.Meshes
         private struct ExtendedVertexShaderOutput
         {
             public VertexShaderOutput vo;
-            public Vector3 positionM;
-            public Vector3 normal;
-            public float height;
+            public Vector3 defPosition;
+            public Vector4 defPositionMVP;
+        }
 
-            public ExtendedVertexShaderOutput(VertexShaderOutput vo, Vector3 position, Vector3 normal, float height)
+        private const float hK = 0.2f;
+
+        private static List<VertexShaderOutput[]> GeometryShader(GeometryShaderInput<CustomUniforms> go)
+        {
+            if (go.uniforms.height is null || (go.uniforms.tessellationLvl == -1))
+                return new() { go.vo };
+
+            var triangles = new List<VertexShaderOutput[]>();
+
+            var evo = new ExtendedVertexShaderOutput[3];
+                
+            for (int i = 0; i < 3; i++)
+                evo[i] = GetHEVO(go, new Vector3(new ReadOnlySpan<float>(go.vo[i].varying)), go.vo[i].varying);
+
+            Tessellation(evo, go, triangles, 0);
+
+            return triangles;
+        }
+
+        private static void Tessellation(ExtendedVertexShaderOutput[] evo, GeometryShaderInput<CustomUniforms> go, List<VertexShaderOutput[]> triangles, int lvl)
+        {
+            if (lvl < go.uniforms.tessellationLvl)
             {
-                this.vo = vo;
-                this.positionM = position;
-                this.normal = normal;
-                this.height = height;
+                var nEVO = new ExtendedVertexShaderOutput[3];
+                nEVO[0] = GetHEVO(go, evo[0], evo[1]);
+                nEVO[1] = GetHEVO(go, evo[1], evo[2]);
+                nEVO[2] = GetHEVO(go, evo[2], evo[0]);
+
+                lvl++;
+
+                Tessellation(nEVO, go, triangles, lvl);
+                Tessellation(new ExtendedVertexShaderOutput[] { nEVO[0], evo[1], nEVO[1] }, go, triangles, lvl);
+                Tessellation(new ExtendedVertexShaderOutput[] { nEVO[1], evo[2], nEVO[2] }, go, triangles, lvl);
+                Tessellation(new ExtendedVertexShaderOutput[] { nEVO[2], evo[0], nEVO[0] }, go, triangles, lvl);
+            }
+            else
+            {
+                triangles.Add(new VertexShaderOutput[] { evo[0].vo, evo[1].vo, evo[2].vo });
             }
         }
 
-        //private static List<VertexShaderOutput[]> GeometryShader(GeometryShaderInput<CustomUniforms> go)
-        //{
-        //    if (go.uniforms.height is null)
-        //        return new() { go.vo };
+        private static ExtendedVertexShaderOutput GetHEVO(GeometryShaderInput<CustomUniforms> go, ExtendedVertexShaderOutput a, ExtendedVertexShaderOutput b)
+        {
+            var defPosition = (a.defPosition + b.defPosition) / 2;
 
-        //    var s1 = new ReadOnlySpan<float>(go.vo[0].varying);
-        //    var s2 = new ReadOnlySpan<float>(go.vo[1].varying);
-        //    var s3 = new ReadOnlySpan<float>(go.vo[2].varying);
+            var varying = new float[a.vo.varying.Length];
 
-        //    var position = new Vector3[] { new Vector3(s1.Slice(0, 3)), new Vector3(s2.Slice(0, 3)), new Vector3(s3.Slice(0, 3)) };
-        //    var texCords = new Vector3[] { new Vector3(s1.Slice(3, 3)), new Vector3(s2.Slice(3, 3)), new Vector3(s3.Slice(3, 3)) };
-        //    var normals = new Vector3[] { new Vector3(s1.Slice(6, 3)), new Vector3(s2.Slice(6, 3)), new Vector3(s3.Slice(6, 3)) };
+            for (int i = 0; i < a.vo.varying.Length; i++)
+                varying[i] = (a.vo.varying[i] + b.vo.varying[i]) / 2;
 
-        //    var triangles = new List<VertexShaderOutput[]>();
+            return GetHEVO(go, defPosition, varying);
+        }
 
-        //    for (int i = 0; i < 3; i++)
-        //        normals[i] = Vector3.Normalize(normals[i]) * GetFromTexture(go.uniforms.bump, texCords[i]);
+        private static ExtendedVertexShaderOutput GetHEVO(GeometryShaderInput<CustomUniforms> go, Vector3 defPosition, float[] varying)
+        {
+            var result = new ExtendedVertexShaderOutput();
 
-        //    Span<float> h = stackalloc float[3];
-        //    for (int i = 0; i < 3; i++)
-        //        h[i] = GetFromTexture(go.uniforms.height, texCords[i]).X;
+            result.defPosition = defPosition;
 
-        //    for (int i = 0; i < 3; i++)
-        //    {
-        //        position[i] += 0.1f * h[i] * normals[i];
+            result.defPositionMVP = Vector4.Transform(new Vector4(result.defPosition, 1.0f), go.uniforms.VP);
+            result.defPositionMVP /= result.defPositionMVP.W;
 
-        //        var positionMVP = Vector4.Transform(new Vector4(position[i], 1.0f), go.uniforms.VP);
+            result.vo.varying = varying;
 
-        //        go.vo[i].W = positionMVP.W;
-        //        go.vo[i].position = positionMVP / positionMVP.W;
-        //        position[i].CopyTo(go.vo[i].varying, 0);
-        //    }
+            var texCords = new Vector3(result.vo.varying[3], result.vo.varying[4], result.vo.varying[5]);
+            var normal = Vector3.Normalize(new Vector3(result.vo.varying[6], result.vo.varying[7], result.vo.varying[8]));
 
-        //    var evo = new ExtendedVertexShaderOutput[3];
-        //    for (int i = 0; i < 3; i++)
-        //        evo[i] = new ExtendedVertexShaderOutput(go.vo[i], position[i], normals[i], h[i]);
+            var h = GetFromTexture(go.uniforms.height, texCords).X;
 
-        //    DivideTriangle(evo, go, triangles, 0);
+            var translatedPositionM = result.defPosition + hK * h * normal;
 
-        //    return triangles;
-        //}
+            var translatedPositionMVP = Vector4.Transform(new Vector4(translatedPositionM, 1.0f), go.uniforms.VP);
 
-        //private static void DivideTriangle(ExtendedVertexShaderOutput[] evo, GeometryShaderInput<CustomUniforms> go, List<VertexShaderOutput[]> triangles, int itr)
-        //{
-        //    var mvp1 = new Vector3(evo[0].vo.position.X, evo[0].vo.position.Y, evo[0].vo.position.Z);
-        //    var mvp2 = new Vector3(evo[1].vo.position.X, evo[1].vo.position.Y, evo[1].vo.position.Z);
-        //    var mvp3 = new Vector3(evo[2].vo.position.X, evo[2].vo.position.Y, evo[2].vo.position.Z);
+            translatedPositionM.CopyTo(result.vo.varying, 0);
 
-        //    if ((itr > 5) || (float)Math.Abs(Vector3.Cross(mvp1 - mvp3, mvp2 - mvp3).Length()) < 0.0001f)
-        //    {
-        //        triangles.Add(new VertexShaderOutput[] { evo[0].vo, evo[1].vo, evo[2].vo });
-        //        return;
-        //    }
+            result.vo.W = translatedPositionMVP.W;
+            result.vo.position = translatedPositionMVP / translatedPositionMVP.W;
 
-        //    float[] centerVaryings = new float[evo[0].vo.varying.Length];
-
-        //    for (int i = 0; i < evo[0].vo.varying.Length; i++)
-        //        centerVaryings[i] = (evo[0].vo.varying[i] + evo[1].vo.varying[i] + evo[2].vo.varying[i]) / 3;
-
-        //    var centerPosition = new Vector3(centerVaryings[0], centerVaryings[1], centerVaryings[2]);
-        //    var centerTexCords = new Vector3(centerVaryings[3], centerVaryings[4], centerVaryings[5]);
-
-        //    var centerNormal = new Vector3(centerVaryings[6], centerVaryings[7], centerVaryings[8]);
-        //    centerNormal = Vector3.Normalize(centerNormal) * GetFromTexture(go.uniforms.bump, centerTexCords);
-
-        //    var centerH = GetFromTexture(go.uniforms.height, centerTexCords).X;
-
-        //    centerPosition += 0.1f * centerH * centerNormal;
-
-        //    var centerPositionMVP = Vector4.Transform(new Vector4(centerPosition, 1.0f), go.uniforms.VP);
-
-        //    var cvo = new VertexShaderOutput(centerPositionMVP / centerPositionMVP.W, centerVaryings, centerPositionMVP.W);
-
-        //    var centerEvo = new ExtendedVertexShaderOutput(cvo, centerPosition, centerNormal, centerH);
-
-        //    var nEvo = new ExtendedVertexShaderOutput[3];
-
-        //    itr++;
-
-        //    nEvo[0] = centerEvo;
-        //    nEvo[1] = evo[0];
-        //    nEvo[2] = evo[1];
-        //    DivideTriangle(nEvo, go, triangles, itr);
-
-        //    nEvo[0] = centerEvo;
-        //    nEvo[1] = evo[1];
-        //    nEvo[2] = evo[2];
-        //    DivideTriangle(nEvo, go, triangles, itr);
-
-        //    nEvo[0] = centerEvo;
-        //    nEvo[1] = evo[2];
-        //    nEvo[2] = evo[0];
-        //    DivideTriangle(nEvo, go, triangles, itr);
-        //}
+            return result;
+        }
 
         private static FragmentShaderOutput FragmentShader(FragmentShaderInput<CustomUniforms> fi)
         {
@@ -377,8 +370,12 @@ namespace AKG.Viewer.Meshes
 
         public void Draw(Canvas canvas, Uniforms uniforms, RenderingOptions options)
         {
+            float dist = (Vector4.Transform(_objModelCenter, uniforms.M) - new Vector4(uniforms.camera.Position, 1.0f)).Length();
+
+            int tlvl = dist > 10.0f ? 0 : dist > 5.0f ? 1 : dist > 3.0f ? 2 : 3;
+
             foreach (var part in _modelParts)
-                _renderer.Draw(canvas, part.attributes, new(uniforms, part), options);
+                _renderer.Draw(canvas, part.attributes, new(uniforms, part, options.UseTessellation ? tlvl : -1), options);
         }
 
         public int GetVerticesNumber()

@@ -167,6 +167,11 @@ namespace Viewer
                     Invoke(() => SwitchPBRDemo());
                 }
 
+                if (nKeysDown.Contains(84))
+                {
+                    _renderingOptions.UseTessellation = !_renderingOptions.UseTessellation;
+                }
+
                 _prevPressed.Clear();
                 _prevPressed.UnionWith(_input.pressedKeys);
             }
@@ -209,12 +214,11 @@ namespace Viewer
 
                     try
                     {
-                        Invoke(() =>
-                        {
-                            var graphics = CreateGraphics();
 
-                            graphics.DrawImage(_bmp, new Rectangle(0, 0, this.Width, this.Height), 0, 0, _bmp.Width, _bmp.Height, GraphicsUnit.Pixel, _imageAttributes);
-                        });
+                        var graphics = CreateGraphics();
+
+                        graphics.DrawImage(_bmp, new Rectangle(0, 0, this.Width, this.Height), 0, 0, _bmp.Width, _bmp.Height, GraphicsUnit.Pixel, _imageAttributes);
+
                     }
                     finally
                     {
@@ -256,7 +260,8 @@ namespace Viewer
                 lVertices.Hide();
                 btnShow.Hide();
 
-                _imageAttributes.SetGamma(2.2f);
+                lock (_bmp)
+                    _imageAttributes.SetGamma(2.2f);
 
                 _uniforms.lights = new List<LightBox>() {
                     new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0)),
