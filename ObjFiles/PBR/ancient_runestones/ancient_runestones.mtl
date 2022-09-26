@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'ancient_runestones.blend'
+# www.blender.org
+
+newmtl pbr
+map_albedo diff.png
+map_bump nor.png
+map_ao ao.png
+map_height height.png
+map_emissive emit.png

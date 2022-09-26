@@ -33,6 +33,7 @@ namespace AKG.Viewer.Meshes
             public Image<Rgba32>? roughness;
             public Image<Rgba32>? ao;
             public Image<Rgba32>? height;
+            public Image<Rgba32>? emissive;
 
             public int tessellationLvl;
 
@@ -55,6 +56,7 @@ namespace AKG.Viewer.Meshes
                 roughness = objModel.mapRoughness;
                 ao = objModel.mapAO;
                 height = objModel.mapHeight;
+                emissive = objModel.mapEmissive;
 
                 this.tessellationLvl = tessellationLvl;
             }
@@ -209,6 +211,16 @@ namespace AKG.Viewer.Meshes
             var worldPos = new Vector3(span.Slice(0, 3));
             var texCords = new Vector3(span.Slice(3, 3));
             var N        = new Vector3(span.Slice(6, 3));
+
+            //Emissive
+            if (fi.uniforms.emissive is not null)
+            {
+                var ec = GetFromTexture(fi.uniforms.emissive, texCords);
+                if (ec.Length() > 0.1f)
+                {
+                    return new(new(ec.X, ec.Y, ec.Z, 1.0f));
+                }
+            }
 
             var albedo = GetFromTexture(fi.uniforms.albedo, texCords);
             float metallic = GetFromTexture(fi.uniforms.metallic, texCords).X;

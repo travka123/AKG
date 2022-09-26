@@ -44,6 +44,7 @@ namespace Rendering
                 { "map_AO", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
                 { "map_ao", (s) => builder.SetMapAO(s.Replace("\\\\", "\\")) },
                 { "map_height", (s) => builder.SetMapHeight(s.Replace("\\\\", "\\")) },
+                { "map_emissive", (s) => builder.SetMapEmit(s.Replace("\\\\", "\\")) },
                 { "refl", (s) => { } },
                 { "Tf", (s) => { } },
                 { "Tr", (s) => { } },

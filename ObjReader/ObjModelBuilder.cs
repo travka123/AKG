@@ -102,6 +102,7 @@ namespace Rendering
             public string? mapRoughness;
             public string? mapAO;
             public string? mapHeight;
+            internal string mapEmissive;
         }
 
         private Dictionary<string, Material> _materials = new();
@@ -211,6 +212,11 @@ namespace Rendering
         {
             usePBR = true;
             _currentMaterial.mapHeight = file;
+        }
+
+        internal void SetMapEmit(string file)
+        {
+            _currentMaterial.mapEmissive = file;
         }
 
         public ObjModelConfig BuildConfig()
@@ -403,6 +409,7 @@ namespace Rendering
                 model.mapRoughness = BufferLoad(material?.mapRoughness, textures);
                 model.mapAO = BufferLoad(material?.mapAO, textures);
                 model.mapHeight = BufferLoad(material?.mapHeight, textures);
+                model.mapEmissive = BufferLoad(material?.mapEmissive, textures);
                 
                 var floats = new List<float>();
 
