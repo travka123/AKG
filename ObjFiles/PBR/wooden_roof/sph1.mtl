@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo Substance_graph_basecolor.jpg
+map_bump Substance_graph_normal.jpg
+map_roughness Substance_graph_roughness.jpg
+map_ao Substance_graph_ambientocclusion.jpg
+map_height Substance_graph_height.jpg

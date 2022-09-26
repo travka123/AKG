@@ -1,0 +1,6 @@
+newmtl base
+map_albedo base_albedo.jpg
+map_bump base_normal.jpg
+map_metallic base_metallic.jpg
+map_roughness base_roughness.jpg
+map_ao base_AO.jpg

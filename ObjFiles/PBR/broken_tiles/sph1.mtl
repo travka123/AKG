@@ -1,0 +1,9 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl pbr
+map_albedo initialShadingGroup_albedo.jpeg
+map_bump initialShadingGroup_normal.png
+map_metallic initialShadingGroup_metallic.jpeg
+map_roughness initialShadingGroup_roughness.jpeg
+map_height TESSELLATEDSPHERE_tiles_Height.png
