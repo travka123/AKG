@@ -175,8 +175,8 @@ namespace AKG.Viewer.Meshes
 
             var hcos = Vector3.Dot(a.defNormal, Vector3.Normalize(a.defNormal + b.defNormal));
             float hdist = (a.defPosition - b.defPosition).Length() / 2;
-            float r = hdist / (float)Math.Sin(Math.Acos(hcos));
-            var center = a.defPosition - (r * a.defNormal);
+            float r = hdist / (float)Math.Abs(Math.Sqrt(1 - hcos * hcos));
+            var center = (a.defPosition - (r * a.defNormal) + b.defPosition - (r * b.defNormal)) / 2;
 
             var defNormal = Vector3.Normalize(new Vector3(new ReadOnlySpan<float>(varying).Slice(6)));
 
