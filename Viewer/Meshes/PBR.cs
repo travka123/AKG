@@ -119,6 +119,7 @@ namespace AKG.Viewer.Meshes
         private struct ExtendedVertexShaderOutput
         {
             public VertexShaderOutput vo;
+            public Vector3 defNormal;
             public Vector3 defPosition;
             public Vector4 defPositionMVP;
         }
@@ -135,7 +136,8 @@ namespace AKG.Viewer.Meshes
             var evo = new ExtendedVertexShaderOutput[3];
                 
             for (int i = 0; i < 3; i++)
-                evo[i] = GetHEVO(go, new Vector3(new ReadOnlySpan<float>(go.vo[i].varying)), go.vo[i].varying);
+                evo[i] = GetHEVO(go, new Vector3(new ReadOnlySpan<float>(go.vo[i].varying)), 
+                    Vector3.Normalize(new Vector3(new ReadOnlySpan<float>(go.vo[i].varying).Slice(6))), go.vo[i].varying);
 
             Tessellation(evo, go, triangles, 0);
 
@@ -166,21 +168,29 @@ namespace AKG.Viewer.Meshes
 
         private static ExtendedVertexShaderOutput GetHEVO(GeometryShaderInput<CustomUniforms> go, ExtendedVertexShaderOutput a, ExtendedVertexShaderOutput b)
         {
-            var defPosition = (a.defPosition + b.defPosition) / 2;
-
             var varying = new float[a.vo.varying.Length];
 
             for (int i = 0; i < a.vo.varying.Length; i++)
                 varying[i] = (a.vo.varying[i] + b.vo.varying[i]) / 2;
 
-            return GetHEVO(go, defPosition, varying);
+            var hcos = Vector3.Dot(a.defNormal, Vector3.Normalize(a.defNormal + b.defNormal));
+            float hdist = (a.defPosition - b.defPosition).Length() / 2;
+            float r = hdist / (float)Math.Abs(Math.Sqrt(1 - hcos * hcos));
+            var center = (a.defPosition - (r * a.defNormal) + b.defPosition - (r * b.defNormal)) / 2;
+
+            var defNormal = Vector3.Normalize(new Vector3(new ReadOnlySpan<float>(varying).Slice(6)));
+
+            var defPosition = center + defNormal * r;
+
+            return GetHEVO(go, defPosition, defNormal, varying);
         }
 
-        private static ExtendedVertexShaderOutput GetHEVO(GeometryShaderInput<CustomUniforms> go, Vector3 defPosition, float[] varying)
+        private static ExtendedVertexShaderOutput GetHEVO(GeometryShaderInput<CustomUniforms> go, Vector3 defPosition, Vector3 defNormal, float[] varying)
         {
             var result = new ExtendedVertexShaderOutput();
 
             result.defPosition = defPosition;
+            result.defNormal = defNormal;
 
             result.defPositionMVP = Vector4.Transform(new Vector4(result.defPosition, 1.0f), go.uniforms.VP);
             result.defPositionMVP /= result.defPositionMVP.W;
@@ -188,11 +198,10 @@ namespace AKG.Viewer.Meshes
             result.vo.varying = varying;
 
             var texCords = new Vector3(result.vo.varying[3], result.vo.varying[4], result.vo.varying[5]);
-            var normal = Vector3.Normalize(new Vector3(result.vo.varying[6], result.vo.varying[7], result.vo.varying[8]));
 
             var h = GetFromTexture(go.uniforms.height, texCords).X;
 
-            var translatedPositionM = result.defPosition + hK * h * normal;
+            var translatedPositionM = result.defPosition + hK * h * result.defNormal;
 
             var translatedPositionMVP = Vector4.Transform(new Vector4(translatedPositionM, 1.0f), go.uniforms.VP);
 
