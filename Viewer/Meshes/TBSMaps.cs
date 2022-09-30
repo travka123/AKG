@@ -45,6 +45,7 @@ namespace AKG.Viewer.Meshes
             public List<LightBox> lights;
             public ObjModel<Attributes> model;
             public SCamera camera;
+            public Matrix4x4 tiM;
 
             public Uniforms(Matrix4x4 mVP, Matrix4x4 m, Vector3 ambientColor,
                 List<LightBox> lights, ObjModel<Attributes> model, SCamera camera)
@@ -55,6 +56,9 @@ namespace AKG.Viewer.Meshes
                 this.lights = lights;
                 this.model = model;
                 this.camera = camera;
+                tiM = new Matrix4x4();
+                Matrix4x4.Invert(M, out tiM);
+                tiM = Matrix4x4.Transpose(tiM);
             }
         }
 
@@ -118,7 +122,7 @@ namespace AKG.Viewer.Meshes
 
                 var position = new Vector4(new ReadOnlySpan<float>(fi.varying, POSITION_OFFSET, 4));
 
-                var positionM = Vector4.Transform(position, fi.uniforms.M);
+                var positionM = Vector4.Transform(position, fi.uniforms.tiM);
 
                 var normal = new Vector3(new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 3));
 
