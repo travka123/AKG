@@ -1,0 +1,142 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl 01_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 2.jpg
+map_Kd Level 2.jpg
+map_Bump Level 2.jpg_specular.jpg
+
+newmtl 02_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 2 Back.jpg
+map_Kd Level 2 Back.jpg
+map_Bump Card Back.jpg_specular.jpg
+
+newmtl 03_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 1.jpg
+map_Kd Level 1.jpg
+map_Bump Level 1.jpg_specular.jpg
+
+newmtl 07_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 1 Back.jpg
+map_Kd Level 1 Back.jpg
+map_Bump Card Back.jpg_specular.jpg
+
+newmtl 08_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 3.jpg
+map_Kd Level 3.jpg
+map_Bump Level 3.jpg_specular.jpg
+
+newmtl 09_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 3 Back.jpg
+map_Kd Level 3 Back.jpg
+map_Bump Card Back.jpg_specular.jpg
+
+newmtl 13_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 4.jpg
+map_Kd Level 4.jpg
+map_Bump Level 4.jpg_specular.jpg
+
+newmtl 14_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 4 Back.jpg
+map_Kd Level 4 Back.jpg
+map_Bump Card Back.jpg_specular.jpg
+
+newmtl 15_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 5.jpg
+map_Kd Level 5.jpg
+map_Bump Level 5.jpg_specular.jpg
+
+newmtl 19_-_Default
+Ns 20.000006
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 32
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Ka Level 5 Back.jpg
+map_Kd Level 5 Back.jpg
+map_Bump Card Back.jpg_specular.jpg
