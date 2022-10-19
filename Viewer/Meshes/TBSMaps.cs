@@ -9,6 +9,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.DataFormats;
 
 namespace AKG.Viewer.Meshes
 {
@@ -124,18 +125,16 @@ namespace AKG.Viewer.Meshes
 
                 var positionM = Vector4.Transform(position, fi.uniforms.tiM);
 
-                var normal = new Vector3(new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 3));
-
                 var bump = fi.uniforms.model.mapBump!;
+
+                var normalM = Vector4.One;
 
                 if (bump is not null)
                 {
                     var bv = bump[(int)((bump.Width - 1) * texCords.X), (int)((bump.Height - 1) * (1 - texCords.Y))].ToScaledVector4();
 
-                    normal = Vector3.Multiply(normal, new Vector3(bv.X, bv.Y, bv.Z));
+                    normalM = Vector4.Transform(new Vector3(bv.X, bv.Y, bv.Z) * 2.0f - Vector3.One, fi.uniforms.tiM); 
                 }
-
-                var normalM = Vector4.Transform(new Vector4(normal, 0), fi.uniforms.M);
 
                 var kd = new Vector3(new ReadOnlySpan<float>(fi.varying, KD_OFFSET, 3));
 

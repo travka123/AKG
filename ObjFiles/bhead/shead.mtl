@@ -1,0 +1,9 @@
+newmtl main
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 25.0
+map_Ka photo_2022-10-19_23-38-07.jpg
+map_Kd photo_2022-10-19_23-38-07.jpg
+map_Bump photo_2022-10-19_23-38-13.jpg
+map_Ks photo_2022-10-19_23-35-14.jpg

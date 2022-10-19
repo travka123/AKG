@@ -91,7 +91,7 @@ namespace AKG.Viewer.Meshes
                 var texCords = new Vector3(span.Slice(4, 3));
                 var normal = new Vector3(span.Slice(7, 3));
 
-                normal = Vector3.Normalize(normal) * GetFromTexture(fi.uniforms.model.mapBump, texCords);
+                normal = Vector3.Transform(GetFromTexture(fi.uniforms.model.mapBump, texCords) * 2.0f - Vector3.One, fi.uniforms.tiM);
 
                 return new(new(Math.Clamp(normal.X, 0, 1), Math.Clamp(normal.Y, 0, 1), Math.Clamp(normal.Z, 0, 1), 1.0f));
             };
