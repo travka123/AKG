@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using AKG.Rendering.ShaderIO;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.ComponentModel.DataAnnotations;
+using static System.Windows.Forms.DataFormats;
 
 namespace AKG.Viewer.Meshes
 {
@@ -43,9 +44,7 @@ namespace AKG.Viewer.Meshes
                 MVP = uniforms.MVP;
                 M = uniforms.M;
                 VP = uniforms.camera.VP;
-
-                Matrix4x4.Invert(M, out TIM);
-                TIM = Matrix4x4.Transpose(TIM);
+                TIM = ShaderHelper.TransposeInverseMatrix(M);
 
                 ambientColor = uniforms.ambientColor;
                 camPos = uniforms.camera.Position;
@@ -67,12 +66,15 @@ namespace AKG.Viewer.Meshes
             public Vector4 position;
             public Vector3 texCords;
             public Vector3 normal;
+            public Vector3 tangent;
+            public Vector3 bitangent;
         }
 
         public static readonly List<ObjModelAttr> Layout = new() {
             ObjModelAttr.Position,
             ObjModelAttr.TexCords,
             ObjModelAttr.Normal,
+            ObjModelAttr.TanBitan,
         };
 
         public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout, pbr: true);
@@ -104,14 +106,20 @@ namespace AKG.Viewer.Meshes
         {
             var positionMVP = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
-            float[] varying = new float[3 + 3 + 3];
+            float[] varying = new float[3 + 3 + 3 + 9];
 
             var positionM = Vector4.Transform(vi.attribute.position, vi.uniforms.M);
             var normalM = Vector3.Transform(vi.attribute.normal, vi.uniforms.TIM);
 
             positionM.CopyTo(varying, 0);
+
             vi.attribute.texCords.CopyTo(varying, 3);
+
             normalM.CopyTo(varying, 6);
+
+            vi.attribute.normal.CopyTo(varying, 9);
+            vi.attribute.tangent.CopyTo(varying, 12);
+            vi.attribute.bitangent.CopyTo(varying, 15);
 
             return new(positionMVP, varying);
         }
@@ -219,7 +227,6 @@ namespace AKG.Viewer.Meshes
 
             var worldPos = new Vector3(span.Slice(0, 3));
             var texCords = new Vector3(span.Slice(3, 3));
-            var N        = new Vector3(span.Slice(6, 3));
 
             //Emissive
             if (fi.uniforms.emissive is not null)
@@ -235,7 +242,7 @@ namespace AKG.Viewer.Meshes
             float metallic = GetFromTexture(fi.uniforms.metallic, texCords).X;
             float roughness = GetFromTexture(fi.uniforms.roughness, texCords).X;
 
-            N = Vector3.Normalize(N) * GetFromTexture(fi.uniforms.bump, texCords);
+            var N = ShaderHelper.NormalFromTexture(fi.uniforms.bump, texCords, fi.uniforms.TIM, span[9..]);
 
             var ctw = fi.uniforms.camPos - worldPos;
             var V = Vector3.Normalize(ctw);

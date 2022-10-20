@@ -16,5 +16,6 @@ namespace AKG.ObjReader
         Ks,
         Illum,
         Ns,
+        TanBitan,
     }
 }

@@ -298,6 +298,7 @@ namespace Rendering
                 { ObjModelAttr.Ks, AddKs },
                 { ObjModelAttr.Illum, AddIllum },
                 { ObjModelAttr.Ns, AddNs },
+                { ObjModelAttr.TanBitan, AddTangentBitangent },
             };
 
             var keys = floatProviders.Keys.ToArray();
@@ -310,29 +311,51 @@ namespace Rendering
             return RunPipe<T>(pipeline);
         }
 
+        List<float> positionsOnly = new();
+
         private void AddPositions(List<float> floats, (int v, int tv, int nv) face, Material material)
         {
             var gv = _gVertices[face.v - 1];
+
             floats.Add(gv.X);
             floats.Add(gv.Y);
             floats.Add(gv.Z);
             floats.Add(gv.W);
+
+            positionsOnly.Add(gv.X);
+            positionsOnly.Add(gv.Y);
+            positionsOnly.Add(gv.Z);
+            positionsOnly.Add(gv.W);
         }
+
+        List<float> normalOnly = new();
 
         private void AddNormals(List<float> floats, (int v, int tv, int nv) face, Material material)
         {
             var nv = _nVertices[face.nv - 1];
+
             floats.Add(nv.X);
             floats.Add(nv.Y);
             floats.Add(nv.Z);
+
+            normalOnly.Add(nv.X);
+            normalOnly.Add(nv.Y);
+            normalOnly.Add(nv.Z);
         }
+
+        List<float> texCordsOnly = new();
 
         private void AddTexCords(List<float> floats, (int v, int tv, int nv) face, Material material)
         {
             var tv = _tVertices[face.tv - 1];
+
             floats.Add(tv.X);
             floats.Add(tv.Y);
             floats.Add(tv.Z);
+
+            texCordsOnly.Add(tv.X);
+            texCordsOnly.Add(tv.Y);
+            texCordsOnly.Add(tv.Z);
         }
 
         private void AddKa(List<float> floats, (int v, int tv, int nv) face, Material material)
@@ -364,6 +387,54 @@ namespace Rendering
         private void AddNs(List<float> floats, (int v, int tv, int nv) faces, Material material)
         {
             floats.Add(material.Ns);
+        }
+
+        List<int> reservedSpace = new();
+
+        private void AddTangentBitangent(List<float> floats, (int v, int tv, int nv) faces, Material material)
+        {
+            reservedSpace.Add(floats.Count);
+
+            floats.Add(0);
+            floats.Add(0);
+            floats.Add(0);
+
+            floats.Add(0);
+            floats.Add(0);
+            floats.Add(0);
+
+            if (reservedSpace.Count == 3)
+            {
+                var position0 = new Vector3(positionsOnly[positionsOnly.Count - 12], positionsOnly[positionsOnly.Count - 11], positionsOnly[positionsOnly.Count - 10]);
+                var position1 = new Vector3(positionsOnly[positionsOnly.Count - 8], positionsOnly[positionsOnly.Count - 7], positionsOnly[positionsOnly.Count - 6]);
+                var position2 = new Vector3(positionsOnly[positionsOnly.Count - 4], positionsOnly[positionsOnly.Count - 3], positionsOnly[positionsOnly.Count - 2]);
+
+                var uv0 = new Vector2(texCordsOnly[texCordsOnly.Count - 9], texCordsOnly[texCordsOnly.Count - 8]);
+                var uv1 = new Vector2(texCordsOnly[texCordsOnly.Count - 6], texCordsOnly[texCordsOnly.Count - 5]);
+                var uv2 = new Vector2(texCordsOnly[texCordsOnly.Count - 3], texCordsOnly[texCordsOnly.Count - 2]);
+
+                var edge1 = position1 - position0;
+                var edge2 = position2 - position0;
+                var deltaUV1 = uv1 - uv0;
+                var deltaUV2 = uv2 - uv0;
+
+                float f = 1.0f / (deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y);
+
+                Vector3 tangent = f * new Vector3(deltaUV2.Y * edge1.X - deltaUV1.Y * edge2.X, deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y, deltaUV2.Y * edge1.Z - deltaUV1.Y * edge2.Z);
+                Vector3 bitangent = f * new Vector3(-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X, -deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y, -deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
+
+                foreach (int index in reservedSpace)
+                {
+                    floats[index + 0] = tangent.X;
+                    floats[index + 1] = tangent.Y;
+                    floats[index + 2] = tangent.Z;
+
+                    floats[index + 3] = bitangent.X;
+                    floats[index + 4] = bitangent.Y;
+                    floats[index + 5] = bitangent.Z;
+                }
+                reservedSpace.Clear();
+            }
         }
 
         private T[,] RunFlatPipe<T>(List<float> floats, PipelineMethod pipeline)
@@ -412,6 +483,8 @@ namespace Rendering
                 model.mapEmissive = BufferLoad(material?.mapEmissive, textures);
                 
                 var floats = new List<float>();
+                positionsOnly = new();
+                texCordsOnly = new();
 
                 foreach (var faces in objFaces.faceLines)
                 {

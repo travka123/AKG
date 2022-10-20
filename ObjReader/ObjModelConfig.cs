@@ -15,7 +15,7 @@ namespace AKG.ObjReader
 
         public bool Is(ObjModelBuildConfig bc)
         {
-            return bc.layout.All((comp) => Attributes.Contains(comp)) && 
+            return bc.layout.All((comp) => Attributes.Contains(comp) || ((comp == ObjModelAttr.TanBitan) && ContainBump)) && 
                 (!bc.texturesRequired || ContainTextures) &&
                 (!bc.bumpMap || ContainBump) &&
                 (!bc.pbr || PBR);

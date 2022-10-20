@@ -2,6 +2,7 @@
 using AKG.Rendering;
 using AKG.Rendering.Rasterisation;
 using Rendering;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace AKG.Viewer.Meshes
             ObjModelAttr.Kd,
             ObjModelAttr.Ks,
             ObjModelAttr.Ns,
+            ObjModelAttr.TanBitan,
         };
 
         public static readonly ObjModelBuildConfig ModelBuildConfig = new(Layout, true, true);
@@ -35,6 +37,8 @@ namespace AKG.Viewer.Meshes
             public Vector3 kd;
             public Vector3 ks;
             public float ns;
+            public Vector3 tangent;
+            public Vector3 bitangent;
         }
 
         private class Uniforms
@@ -45,7 +49,7 @@ namespace AKG.Viewer.Meshes
             public List<LightBox> lights;
             public ObjModel<Attributes> model;
             public SCamera camera;
-            public Matrix4x4 tiM;
+            public Matrix4x4 TIM;
 
             public Uniforms(Matrix4x4 mVP, Matrix4x4 m, Vector3 ambientColor,
                 List<LightBox> lights, ObjModel<Attributes> model, SCamera camera)
@@ -56,19 +60,19 @@ namespace AKG.Viewer.Meshes
                 this.lights = lights;
                 this.model = model;
                 this.camera = camera;
-                tiM = new Matrix4x4();
-                Matrix4x4.Invert(M, out tiM);
-                tiM = Matrix4x4.Transpose(tiM);
+                TIM = ShaderHelper.TransposeInverseMatrix(M);
             }
         }
 
         const int POSITION_OFFSET = 0;
-        const int NORMAL_OFFSET = 4;
+        const int TEXTURE_OFFSET = 4;
         const int KA_OFFSET = 7;
         const int KD_OFFSET = 10;
         const int KS_OFFSET = 13;
         const int NS_OFFSET = 16;
-        const int TEXTURE_OFFSET = 17;
+        const int NORMAL_OFFSET = 17;
+        const int TAN_OFFSET = 20;
+        const int BTAN_OFFSET = 23;
 
         private ObjModel<Attributes>[] _models;
 
@@ -84,11 +88,11 @@ namespace AKG.Viewer.Meshes
             {
                 var position = Vector4.Transform(vi.attribute.position, vi.uniforms.MVP);
 
-                float[] varying = new float[20];
+                float[] varying = new float[26];
 
                 vi.attribute.position.CopyTo(varying, POSITION_OFFSET);
 
-                vi.attribute.normal.CopyTo(varying, NORMAL_OFFSET);
+                vi.attribute.texCords.CopyTo(varying, TEXTURE_OFFSET);
 
                 vi.attribute.ka.CopyTo(varying, KA_OFFSET);
 
@@ -98,7 +102,11 @@ namespace AKG.Viewer.Meshes
 
                 varying[NS_OFFSET] = vi.attribute.ns;
 
-                vi.attribute.texCords.CopyTo(varying, TEXTURE_OFFSET);
+                vi.attribute.normal.CopyTo(varying, NORMAL_OFFSET);
+
+                vi.attribute.tangent.CopyTo(varying, TAN_OFFSET);
+
+                vi.attribute.bitangent.CopyTo(varying, BTAN_OFFSET);
 
                 return new(position, varying);
             };
@@ -122,34 +130,23 @@ namespace AKG.Viewer.Meshes
 
                 var position = new Vector4(new ReadOnlySpan<float>(fi.varying, POSITION_OFFSET, 4));
 
-                var positionM = Vector4.Transform(position, fi.uniforms.tiM);
+                var positionM = Vector4.Transform(position, fi.uniforms.TIM);
 
-                var normal = new Vector3(new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 3));
-
-                var bump = fi.uniforms.model.mapBump!;
-
-                if (bump is not null)
-                {
-                    var bv = bump[(int)((bump.Width - 1) * texCords.X), (int)((bump.Height - 1) * (1 - texCords.Y))].ToScaledVector4();
-
-                    normal = Vector3.Multiply(normal, new Vector3(bv.X, bv.Y, bv.Z));
-                }
-
-                var normalM = Vector4.Transform(new Vector4(normal, 0), fi.uniforms.M);
+                var normal = ShaderHelper.NormalFromTexture(fi.uniforms.model.mapBump, texCords, fi.uniforms.TIM, new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 9));
 
                 var kd = new Vector3(new ReadOnlySpan<float>(fi.varying, KD_OFFSET, 3));
 
                 var diffuse = Vector3.Zero;
 
-                var lightDirs = new Vector4[fi.uniforms.lights.Count];
+                var lightDirs = new Vector3[fi.uniforms.lights.Count];
 
                 for (int i = 0; i < lightDirs.Length; i++)
                 {
                     var light = fi.uniforms.lights[i];
 
-                    lightDirs[i] = Vector4.Normalize(new Vector4(light.Position.X, light.Position.Y, light.Position.Z, 1) - positionM);
+                    lightDirs[i] = Vector3.Normalize(light.Position - new Vector3(positionM.X, positionM.Y, positionM.Z));
 
-                    var w = Math.Max(Vector4.Dot(lightDirs[i], Vector4.Normalize(normalM)), 0);
+                    var w = Math.Max(Vector3.Dot(lightDirs[i], normal), 0);
 
                     if (w > 0)
                         diffuse += kd * w * light.ColorDiffuse;
@@ -184,8 +181,7 @@ namespace AKG.Viewer.Meshes
 
                 for (int i = 0; i < lightDirs.Length; i++)
                 {
-                    var reflectDir = Vector3.Reflect(new Vector3(-lightDirs[i].X, -lightDirs[i].Y, -lightDirs[i].Z),
-                        new Vector3(-normalM.X, -normalM.Y, -normalM.Z));
+                    var reflectDir = Vector3.Reflect(new Vector3(-lightDirs[i].X, -lightDirs[i].Y, -lightDirs[i].Z), -normal);
 
                     var w = Math.Max(Vector3.Dot(viewDir, reflectDir), 0);
 
@@ -199,6 +195,19 @@ namespace AKG.Viewer.Meshes
             };
 
             _renderer = new Renderer<Attributes, Uniforms>(shader);
+        }
+
+        private static Vector3 GetFromTexture(Image<Rgba32>? image, Vector3 texCords)
+        {
+            if (image is null)
+                return Vector3.One;
+
+            int x = (int)((image.Width - 1) * texCords.X);
+            int y = (int)((image.Height - 1) * (1 - texCords.Y));
+
+            var rgba32 = image[x, y].ToScaledVector4();
+
+            return new Vector3(rgba32.X, rgba32.Y, rgba32.Z);
         }
 
         public void Draw(Canvas canvas, Viewer.Uniforms uniforms, RenderingOptions options)
