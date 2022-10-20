@@ -231,14 +231,14 @@ namespace AKG.Viewer.Meshes
             //Emissive
             if (fi.uniforms.emissive is not null)
             {
-                var ec = GetFromTexture(fi.uniforms.emissive, texCords);
-                if (ec.Length() > 0.1f)
+                var emissive = GetFromTexture(fi.uniforms.emissive, texCords);
+                if (emissive.Length() > 0.1f)
                 {
-                    return new(new(ec.X, ec.Y, ec.Z, 1.0f));
+                    return new(new(emissive.X, emissive.Y, emissive.Z, 1.0f));
                 }
             }
 
-            var albedo = GetFromTexture(fi.uniforms.albedo, texCords);
+            var albedo = ShaderHelper.SrgbToLinear(GetFromTexture(fi.uniforms.albedo, texCords));
             float metallic = GetFromTexture(fi.uniforms.metallic, texCords).X;
             float roughness = GetFromTexture(fi.uniforms.roughness, texCords).X;
 
@@ -290,9 +290,7 @@ namespace AKG.Viewer.Meshes
 
             //HDR
             color = color / (color + Vector3.One);
-            color.X = (float)Math.Pow(color.X, 1.0f / 2.2f);
-            color.Y = (float)Math.Pow(color.Y, 1.0f / 2.2f);
-            color.Z = (float)Math.Pow(color.Z, 1.0f / 2.2f);
+            color = ShaderHelper.LinearToSrgb(color);
 
             return new(new(color.X, color.Y, color.Z, 1.0f));
         }

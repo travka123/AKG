@@ -57,5 +57,36 @@ namespace AKG.Viewer.Meshes
         {
             return NormalFromTexture(image, texCords, tim, new Vector3(tbnVectors[3..]), new Vector3(tbnVectors[6..]), new Vector3(tbnVectors));
         }
+
+        public static Vector3 SrgbToLinear(Vector3 color)
+        {
+            color.X = (float)Math.Pow(color.X, 2.2f);
+            color.Y = (float)Math.Pow(color.Y, 2.2f);
+            color.Z = (float)Math.Pow(color.Z, 2.2f);
+            return color;
+        }
+
+        public static Vector3 LinearToSrgb(Vector3 color)
+        {
+            color.X = (float)Math.Pow(color.X, 1.0f / 2.2f);
+            color.Y = (float)Math.Pow(color.Y, 1.0f / 2.2f);
+            color.Z = (float)Math.Pow(color.Z, 1.0f / 2.2f);
+            return color;
+        }
+
+        public static Vector3 Saturate(Vector3 value)
+        {
+            return Clamp(value, 0.0f, 1.0f);
+        }
+
+        public static Vector3 ACESFilm(Vector3 color)
+        {
+            var a = new Vector3(2.51f);
+            var b = new Vector3(0.03f);
+            var c = new Vector3(2.43f);
+            var d = new Vector3(0.59f);
+            var e = new Vector3(0.14f);
+            return Saturate((color * (a * color + b)) / (color * (c * color + d) + e));
+        }
     }
 }
