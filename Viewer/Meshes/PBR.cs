@@ -289,7 +289,7 @@ namespace AKG.Viewer.Meshes
             var color = Lo + ambient;
 
             //HDR
-            color = color / (color + Vector3.One);
+            color = ShaderHelper.ACESFilm(color);
             color = ShaderHelper.LinearToSrgb(color);
 
             return new(new(color.X, color.Y, color.Z, 1.0f));

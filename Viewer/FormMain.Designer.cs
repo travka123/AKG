@@ -43,9 +43,10 @@
             // 
             this.cbMeshes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbMeshes.FormattingEnabled = true;
-            this.cbMeshes.Location = new System.Drawing.Point(522, 39);
+            this.cbMeshes.Location = new System.Drawing.Point(746, 65);
+            this.cbMeshes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbMeshes.Name = "cbMeshes";
-            this.cbMeshes.Size = new System.Drawing.Size(144, 23);
+            this.cbMeshes.Size = new System.Drawing.Size(204, 33);
             this.cbMeshes.TabIndex = 0;
             this.cbMeshes.TabStop = false;
             this.cbMeshes.SelectedIndexChanged += new System.EventHandler(this.cbMeshes_SelectedIndexChanged);
@@ -53,9 +54,10 @@
             // 
             // btnShow
             // 
-            this.btnShow.Location = new System.Drawing.Point(543, 21);
+            this.btnShow.Location = new System.Drawing.Point(776, 35);
+            this.btnShow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnShow.Name = "btnShow";
-            this.btnShow.Size = new System.Drawing.Size(122, 22);
+            this.btnShow.Size = new System.Drawing.Size(174, 37);
             this.btnShow.TabIndex = 0;
             this.btnShow.TabStop = false;
             this.btnShow.Text = "SHOW";
@@ -67,9 +69,10 @@
             // 
             this.cbModels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbModels.FormattingEnabled = true;
-            this.cbModels.Location = new System.Drawing.Point(522, 12);
+            this.cbModels.Location = new System.Drawing.Point(746, 20);
+            this.cbModels.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbModels.Name = "cbModels";
-            this.cbModels.Size = new System.Drawing.Size(144, 23);
+            this.cbModels.Size = new System.Drawing.Size(204, 33);
             this.cbModels.TabIndex = 0;
             this.cbModels.TabStop = false;
             this.cbModels.SelectedIndexChanged += new System.EventHandler(this.cbModels_SelectedIndexChanged);
@@ -79,9 +82,10 @@
             // 
             this.cbSelectedMesh.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSelectedMesh.FormattingEnabled = true;
-            this.cbSelectedMesh.Location = new System.Drawing.Point(522, 66);
+            this.cbSelectedMesh.Location = new System.Drawing.Point(746, 110);
+            this.cbSelectedMesh.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cbSelectedMesh.Name = "cbSelectedMesh";
-            this.cbSelectedMesh.Size = new System.Drawing.Size(144, 23);
+            this.cbSelectedMesh.Size = new System.Drawing.Size(204, 33);
             this.cbSelectedMesh.TabIndex = 0;
             this.cbSelectedMesh.TabStop = false;
             this.cbSelectedMesh.SelectedIndexChanged += new System.EventHandler(this.cbSelectedMesh_SelectedIndexChanged);
@@ -89,9 +93,10 @@
             // 
             // btnAmbient
             // 
-            this.btnAmbient.Location = new System.Drawing.Point(589, 95);
+            this.btnAmbient.Location = new System.Drawing.Point(841, 158);
+            this.btnAmbient.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnAmbient.Name = "btnAmbient";
-            this.btnAmbient.Size = new System.Drawing.Size(75, 23);
+            this.btnAmbient.Size = new System.Drawing.Size(107, 38);
             this.btnAmbient.TabIndex = 0;
             this.btnAmbient.TabStop = false;
             this.btnAmbient.Text = "ambient";
@@ -101,9 +106,10 @@
             // 
             // btnDiffuse
             // 
-            this.btnDiffuse.Location = new System.Drawing.Point(590, 124);
+            this.btnDiffuse.Location = new System.Drawing.Point(843, 207);
+            this.btnDiffuse.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnDiffuse.Name = "btnDiffuse";
-            this.btnDiffuse.Size = new System.Drawing.Size(75, 23);
+            this.btnDiffuse.Size = new System.Drawing.Size(107, 38);
             this.btnDiffuse.TabIndex = 0;
             this.btnDiffuse.TabStop = false;
             this.btnDiffuse.Text = "diffuse";
@@ -113,9 +119,10 @@
             // 
             // btnSpecular
             // 
-            this.btnSpecular.Location = new System.Drawing.Point(589, 153);
+            this.btnSpecular.Location = new System.Drawing.Point(841, 255);
+            this.btnSpecular.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnSpecular.Name = "btnSpecular";
-            this.btnSpecular.Size = new System.Drawing.Size(75, 23);
+            this.btnSpecular.Size = new System.Drawing.Size(107, 38);
             this.btnSpecular.TabIndex = 0;
             this.btnSpecular.TabStop = false;
             this.btnSpecular.Text = "specular";
@@ -127,17 +134,18 @@
             // 
             this.lVertices.AutoSize = true;
             this.lVertices.BackColor = System.Drawing.Color.MistyRose;
-            this.lVertices.Location = new System.Drawing.Point(12, 540);
+            this.lVertices.Location = new System.Drawing.Point(17, 900);
+            this.lVertices.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lVertices.Name = "lVertices";
-            this.lVertices.Size = new System.Drawing.Size(47, 15);
+            this.lVertices.Size = new System.Drawing.Size(72, 25);
             this.lVertices.TabIndex = 2;
             this.lVertices.Text = "Vertices";
             // 
             // FormMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(680, 564);
+            this.ClientSize = new System.Drawing.Size(971, 940);
             this.Controls.Add(this.lVertices);
             this.Controls.Add(this.btnSpecular);
             this.Controls.Add(this.btnDiffuse);
@@ -147,6 +155,7 @@
             this.Controls.Add(this.cbMeshes);
             this.Controls.Add(this.btnShow);
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FormMain";
             this.Text = "Hello world";
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.FormMain_PreviewKeyDown);

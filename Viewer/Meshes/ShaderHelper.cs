@@ -28,8 +28,8 @@ namespace AKG.Viewer.Meshes
         public static Vector3 Clamp(Vector3 value, float min, float max)
         {
             value.X = Math.Clamp(value.X, min, max);
-            value.Y = Math.Clamp(value.X, min, max);
-            value.Z = Math.Clamp(value.X, min, max);
+            value.Y = Math.Clamp(value.Y, min, max);
+            value.Z = Math.Clamp(value.Z, min, max);
             return value;
         }
 
