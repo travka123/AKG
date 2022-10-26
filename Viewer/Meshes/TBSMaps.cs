@@ -18,11 +18,11 @@ namespace AKG.Viewer.Meshes
         public static readonly List<ObjModelAttr> Layout = new() {
             ObjModelAttr.Position,
             ObjModelAttr.TexCords,
-            ObjModelAttr.Normal,
             ObjModelAttr.Ka,
             ObjModelAttr.Kd,
             ObjModelAttr.Ks,
             ObjModelAttr.Ns,
+            ObjModelAttr.Normal,
             ObjModelAttr.TanBitan,
         };
 
@@ -32,11 +32,11 @@ namespace AKG.Viewer.Meshes
         {
             public Vector4 position;
             public Vector3 texCords;
-            public Vector3 normal;
             public Vector3 ka;
             public Vector3 kd;
             public Vector3 ks;
             public float ns;
+            public Vector3 normal;
             public Vector3 tangent;
             public Vector3 bitangent;
         }

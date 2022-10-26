@@ -272,9 +272,9 @@ namespace Viewer
 
                 _controls = new FlyingCameraControls(_uniforms.camera);
 
-                _clearColor = new Vector4(0.9f, 0.9f, 0.9f, 1.0f);
+                _clearColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
 
-                _uniforms.ambientColor = new Vector3(0.1f, 0.1f, 0.1f);
+                _uniforms.ambientColor = new Vector3(0.05f, 0.05f, 0.05f);
 
                 _entity.SetMesh(new PBRDemo(_models.Where(f => f.Contains("ObjFiles\\PBR\\")).ToList()));
             }
