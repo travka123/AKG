@@ -140,6 +140,8 @@ namespace Viewer
         private readonly object _inputLock = new object();
         private HashSet<int> _prevPressed = new HashSet<int>();
 
+        private LightBox _fleshLight = new LightBox(new(0, 0, -15), new Vector3(1, 1, 1), 350);
+
         private void ProcessInput()
         {
             lock (_inputLock)
@@ -151,6 +153,8 @@ namespace Viewer
                 _input.mouseOffset = _input.mouseCurPosition - _input.mousePrevPosition;
 
                 _controls.Process(_input);
+
+                _fleshLight.Position = _uniforms.camera.Position - _uniforms.camera.Direction;
 
                 _input.mouseOffset = Vector2.Zero;
                 _input.mousePrevPosition = _input.mouseCurPosition;
@@ -170,6 +174,18 @@ namespace Viewer
                 if (nKeysDown.Contains(84))
                 {
                     _renderingOptions.UseTessellation = !_renderingOptions.UseTessellation;
+                }
+
+                if (nKeysDown.Contains(70))
+                {
+                    if (_uniforms.lights.Contains(_fleshLight))
+                    {
+                        _uniforms.lights.Remove(_fleshLight);
+                    }
+                    else
+                    {
+                        _uniforms.lights.Add(_fleshLight);
+                    }
                 }
 
                 _prevPressed.Clear();
@@ -220,7 +236,7 @@ namespace Viewer
                         graphics.DrawImage(_bmp, new Rectangle(0, 0, this.Width, this.Height), 0, 0, _bmp.Width, _bmp.Height, GraphicsUnit.Pixel, _imageAttributes);
 
                     }
-                    finally
+                    catch
                     {
 
                     }
@@ -261,11 +277,13 @@ namespace Viewer
                 btnShow.Hide();
 
                 _uniforms.lights = new List<LightBox>() {
-                    new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0), 1000),
-                    new LightBox(new( 10,  10,  15), new Vector3(1, 0, 1), 1000),
-                    new LightBox(new(  0, -10,  15), new Vector3(0, 1, 1), 1000),
-                    new LightBox(new(  0,   0, -15), new Vector3(1, 1, 1), 1000),
+                    new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0), 320),
+                    new LightBox(new( 10,  10,  15), new Vector3(1, 0, 1), 320),
+                    new LightBox(new(  0, -10,  15), new Vector3(0, 1, 1), 320),
+                    new LightBox(new(  0,   0, -15), new Vector3(1, 1, 1), 900),
                 };
+
+                int n = 4;
 
                 _controls = new FlyingCameraControls(_uniforms.camera);
 
