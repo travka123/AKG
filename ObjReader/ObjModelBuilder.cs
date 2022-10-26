@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System.Reflection;
 
 namespace Rendering
 {
@@ -390,13 +389,11 @@ namespace Rendering
             floats.Add(material.Ns);
         }
 
-        List<(int i, int v)> reservedSpace = new();
-
-        Dictionary<int, (List<int> indices, List<(Vector3 t, Vector3 bt)> tbt)> tbd = new();
+        List<int> reservedSpace = new();
 
         private void AddTangentBitangent(List<float> floats, (int v, int tv, int nv) faces, Material material)
         {
-            reservedSpace.Add((floats.Count, faces.v));
+            reservedSpace.Add(floats.Count);
 
             floats.Add(0);
             floats.Add(0);
@@ -424,48 +421,13 @@ namespace Rendering
                 float f = 1.0f / (deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y);
 
                 Vector3 tangent = f * new Vector3(deltaUV2.Y * edge1.X - deltaUV1.Y * edge2.X, deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y, deltaUV2.Y * edge1.Z - deltaUV1.Y * edge2.Z);
-                Vector3 bitangent = f * new Vector3(-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X, -deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y, -deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
+                //Vector3 bitangent = f * new Vector3(-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X, -deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y, -deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
 
-                foreach (var (i, v) in reservedSpace)
+                foreach (int index in reservedSpace)
                 {
-                    (List<int> indices, List < (Vector3 t, Vector3 bt) > tbt) vtbd;
+                    Vector3 normal = new Vector3(floats[index - 3], floats[index - 2], floats[index - 1]);
+                    Vector3 bitangent = Vector3.Cross(normal, tangent);
 
-                    if (!tbd.ContainsKey(v))
-                    {
-                        vtbd = new() { indices = new(), tbt = new() };
-                        tbd[v] = vtbd;
-                    }
-                    else
-                    {
-                        vtbd = tbd[v];
-                    }
-
-                    vtbd.indices.Add(i);
-                    vtbd.tbt.Add((tangent, bitangent));
-                }
-
-                reservedSpace.Clear();
-            }
-        }
-
-        private void RsolveTangentBitangent(List<float> floats)
-        {
-            foreach (var (v, tbd) in tbd)
-            {
-                Vector3 tangent = new Vector3(0.0f);
-                Vector3 bitangent = new Vector3(0.0f);
-
-                foreach (var (t, bt) in tbd.tbt)
-                {
-                    tangent += t;
-                    bitangent += bt;
-                }
-
-                tangent /= tbd.tbt.Count;
-                bitangent /= tbd.tbt.Count;
-
-                foreach (var index in tbd.indices)
-                {
                     floats[index + 0] = tangent.X;
                     floats[index + 1] = tangent.Y;
                     floats[index + 2] = tangent.Z;
@@ -474,6 +436,7 @@ namespace Rendering
                     floats[index + 4] = bitangent.Y;
                     floats[index + 5] = bitangent.Z;
                 }
+                reservedSpace.Clear();
             }
         }
 
@@ -521,9 +484,8 @@ namespace Rendering
                 model.mapAO = BufferLoad(material?.mapAO, textures);
                 model.mapHeight = BufferLoad(material?.mapHeight, textures);
                 model.mapEmissive = BufferLoad(material?.mapEmissive, textures);
-                
+
                 var floats = new List<float>();
-                tbd = new();
                 positionsOnly = new();
                 texCordsOnly = new();
 
@@ -535,11 +497,6 @@ namespace Rendering
                         pipeline(floats, faces[i - 1], material!);
                         pipeline(floats, faces[i], material!);
                     }
-                }
-
-                if (tbd.Count > 0)
-                {
-                    RsolveTangentBitangent(floats);
                 }
 
                 model.attributes = TriangleArray(Cast<T>(floats.ToArray()));
@@ -593,7 +550,7 @@ namespace Rendering
             {
                 tArr[i, 0] = array[j];
                 tArr[i, 1] = array[j + 1];
-                tArr[i, 2] = array[j + 2];            
+                tArr[i, 2] = array[j + 2];
             }
 
             return tArr;

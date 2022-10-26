@@ -123,7 +123,7 @@ namespace AKG.Rendering.Rasterisation
                             kvpPrev = kvpItr.Current;
                         }
 
-                        //drawLine(kvpPrev.Value, kvpCurr.Value, drawCallback);
+                        drawCallback(kvpPrev.Key, pixelY, kvpPrev.Value);
                     }
                 }
                 else

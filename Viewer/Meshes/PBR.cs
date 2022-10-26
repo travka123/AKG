@@ -260,7 +260,7 @@ namespace AKG.Viewer.Meshes
                 var H = Vector3.Normalize(V + L);
 
                 float distance = ltw.Length();
-                float attenuation = 1.0f / (distance * distance / 1000);
+                float attenuation = 1.0f / (distance * distance / light.Intensity);
                 var radiance = light.ColorDiffuse * attenuation;
 
                 float NDF = DistributionGGX(N, H, roughness);
