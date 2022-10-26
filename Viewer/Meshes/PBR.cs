@@ -244,6 +244,8 @@ namespace AKG.Viewer.Meshes
 
             var N = ShaderHelper.NormalFromTexture(fi.uniforms.bump, texCords, fi.uniforms.TIM, span[9..]);
 
+            //return new(new(Math.Clamp(N.X, 0, 1), Math.Clamp(N.Y, 0, 1), Math.Clamp(N.Z, 0, 1), 1.0f));
+
             var ctw = fi.uniforms.camPos - worldPos;
             var V = Vector3.Normalize(ctw);
 
@@ -260,7 +262,7 @@ namespace AKG.Viewer.Meshes
                 var H = Vector3.Normalize(V + L);
 
                 float distance = ltw.Length();
-                float attenuation = 1.0f / (distance * distance / 1000);
+                float attenuation = 1.0f / (distance * distance) * light.Intensity;
                 var radiance = light.ColorDiffuse * attenuation;
 
                 float NDF = DistributionGGX(N, H, roughness);

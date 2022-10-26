@@ -6,5 +6,6 @@ namespace AKG.Viewer
     {
         public Vector3 ColorDiffuse { get; set; }
         public Vector3 ColorSpecular { get; set; }
+        public float Intensity { get; set; }
     }
 }
