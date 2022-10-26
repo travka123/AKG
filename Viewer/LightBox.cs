@@ -26,9 +26,8 @@ namespace AKG.Viewer
         public Vector3 Direction { get; set; } = new Vector3(0, 0, -1);
         public Vector3 ColorDiffuse { get; set; }
         public Vector3 ColorSpecular { get; set; }
-        public float Intensity { get; set; }
 
-        public LightBox(Vector3 position, Vector3 color, float intensity)
+        public LightBox(Vector3 position, Vector3 color)
         {
             var config = new ObjModelBuildConfig(new() { ObjModelAttr.Position });
 
@@ -44,7 +43,6 @@ namespace AKG.Viewer
             shaderProgram.fragmentShader = FragmentShader;
 
             _renderer = new Renderer<Vector4, Uniforms>(shaderProgram);
-            Intensity = intensity;
         }
 
         public void Draw(Canvas canvas, Uniforms uniforms, RenderingOptions options)

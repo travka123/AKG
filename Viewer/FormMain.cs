@@ -80,7 +80,7 @@ namespace Viewer
 
             var lights = new List<LightBox>()
             {
-                new LightBox(new Vector3(5, 5, 5), new Vector3(1, 1, 1), 1000),
+                new LightBox(new Vector3(5, 5, 5), new Vector3(1, 1, 1)),
             };
 
             _uniforms = new Uniforms(camera, lights);
@@ -98,7 +98,7 @@ namespace Viewer
 
             _controls = new FlyingCameraControls(_uniforms.camera);
 
-            _uniforms.lights = new List<LightBox>() { new LightBox(new(5, 5, 5), new Vector3(1, 1, 1), 1000) };
+            _uniforms.lights = new List<LightBox>() { new LightBox(new(5, 5, 5), new Vector3(1, 1, 1)) };
 
             _meshes = new Dictionary<string, (ObjModelBuildConfig conf, Func<Mesh> create)>()
             {
@@ -264,10 +264,10 @@ namespace Viewer
                     _imageAttributes.SetGamma(2.2f);
 
                 _uniforms.lights = new List<LightBox>() {
-                    new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0), 1500),
-                    new LightBox(new( 10,  10,  15), new Vector3(1, 0, 1), 1500),
-                    new LightBox(new(  0, -10,  15), new Vector3(0, 1, 1), 1500),
-                    new LightBox(new(  0,   0, -15), new Vector3(1, 1, 1), 2500),
+                    new LightBox(new(-10,  10,  15), new Vector3(1, 1, 0)),
+                    new LightBox(new( 10,  10,  15), new Vector3(1, 0, 1)),
+                    new LightBox(new(  0, -10,  15), new Vector3(0, 1, 1)),
+                    new LightBox(new(  0,   0, -15), new Vector3(1, 1, 1)),
                 };
 
                 _controls = new FlyingCameraControls(_uniforms.camera);
