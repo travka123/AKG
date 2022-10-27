@@ -90,7 +90,7 @@ namespace AKG.Viewer.Meshes
 
                 float[] varying = new float[26];
 
-                vi.attribute.position.CopyTo(varying, POSITION_OFFSET);
+                position.CopyTo(varying, POSITION_OFFSET);
 
                 vi.attribute.texCords.CopyTo(varying, TEXTURE_OFFSET);
 
@@ -130,7 +130,7 @@ namespace AKG.Viewer.Meshes
 
                 var position = new Vector4(new ReadOnlySpan<float>(fi.varying, POSITION_OFFSET, 4));
 
-                var positionM = Vector4.Transform(position, fi.uniforms.TIM);
+                var positionM = Vector4.Transform(position, fi.uniforms.M);
 
                 var normal = ShaderHelper.NormalFromTexture(fi.uniforms.model.mapBump, texCords, fi.uniforms.TIM, new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 9));
 

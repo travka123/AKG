@@ -55,9 +55,7 @@ namespace AKG.Viewer.Meshes
                 this.lights = lights;
                 this.model = model;
                 this.camera = camera;
-                tiM = new Matrix4x4();
-                Matrix4x4.Invert(M, out tiM);
-                tiM = Matrix4x4.Transpose(tiM);
+                tiM = ShaderHelper.TransposeInverseMatrix(M);
             }
         }
 
@@ -125,7 +123,7 @@ namespace AKG.Viewer.Meshes
 
                 var normal = new Vector3(new ReadOnlySpan<float>(fi.varying, NORMAL_OFFSET, 3));
 
-                var normalM = Vector4.Transform(new Vector4(normal, 0), fi.uniforms.tiM);
+                var normalM = Vector4.Transform(Vector3.Normalize(normal), fi.uniforms.tiM);
 
                 var kd = new Vector3(new ReadOnlySpan<float>(fi.varying, KD_OFFSET, 3));
 
@@ -139,7 +137,7 @@ namespace AKG.Viewer.Meshes
 
                     lightDirs[i] = Vector4.Normalize(new Vector4(light.Position.X, light.Position.Y, light.Position.Z, 1) - positionM);
 
-                    var w = Math.Max(Vector4.Dot(lightDirs[i], Vector4.Normalize(normalM)), 0);
+                    var w = Math.Max(Vector4.Dot(Vector4.Normalize(lightDirs[i]), normalM), 0);
 
                     if (w > 0)
                         diffuse += kd * w * light.ColorDiffuse;
