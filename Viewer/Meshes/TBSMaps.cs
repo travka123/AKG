@@ -90,7 +90,7 @@ namespace AKG.Viewer.Meshes
 
                 float[] varying = new float[26];
 
-                position.CopyTo(varying, POSITION_OFFSET);
+                vi.attribute.position.CopyTo(varying, POSITION_OFFSET);
 
                 vi.attribute.texCords.CopyTo(varying, TEXTURE_OFFSET);
 
