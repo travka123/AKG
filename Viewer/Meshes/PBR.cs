@@ -37,8 +37,9 @@ namespace AKG.Viewer.Meshes
             public Image<Rgba32>? emissive;
 
             public int tessellationLvl;
+            public bool showNormals;
 
-            public CustomUniforms(Uniforms uniforms, ObjModel<Attributes> objModel, int tessellationLvl)
+            public CustomUniforms(Uniforms uniforms, ObjModel<Attributes> objModel, int tessellationLvl, bool showNormals)
             {
                 lights = uniforms.lights;
                 MVP = uniforms.MVP;
@@ -58,6 +59,7 @@ namespace AKG.Viewer.Meshes
                 emissive = objModel.mapEmissive;
 
                 this.tessellationLvl = tessellationLvl;
+                this.showNormals = showNormals;
             }
         }
 
@@ -244,7 +246,8 @@ namespace AKG.Viewer.Meshes
 
             var N = ShaderHelper.NormalFromTexture(fi.uniforms.bump, texCords, fi.uniforms.TIM, span[9..]);
 
-            //return new(new(Math.Clamp(N.X, 0, 1), Math.Clamp(N.Y, 0, 1), Math.Clamp(N.Z, 0, 1), 1.0f));
+            if (fi.uniforms.showNormals)
+                return new(new(Math.Clamp(N.X, 0, 1), Math.Clamp(N.Y, 0, 1), Math.Clamp(N.Z, 0, 1), 1.0f));
 
             var ctw = fi.uniforms.camPos - worldPos;
             var V = Vector3.Normalize(ctw);
@@ -403,7 +406,7 @@ namespace AKG.Viewer.Meshes
             int tlvl = dist > 10.0f ? 0 : dist > 5.0f ? 1 : dist > 3.0f ? 2 : 3;
 
             foreach (var part in _modelParts)
-                _renderer.Draw(canvas, part.attributes, new(uniforms, part, options.UseTessellation ? tlvl : -1), options);
+                _renderer.Draw(canvas, part.attributes, new(uniforms, part, options.UseTessellation ? tlvl : -1, options.ShowNormals), options);
         }
 
         public int GetVerticesNumber()

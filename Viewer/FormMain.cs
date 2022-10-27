@@ -176,6 +176,11 @@ namespace Viewer
                     _renderingOptions.UseTessellation = !_renderingOptions.UseTessellation;
                 }
 
+                if (nKeysDown.Contains(78))
+                {
+                    _renderingOptions.ShowNormals = !_renderingOptions.ShowNormals;
+                }
+
                 if (nKeysDown.Contains(70))
                 {
                     if (_uniforms.lights.Contains(_fleshLight))
